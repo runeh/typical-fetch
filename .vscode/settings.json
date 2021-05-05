@@ -1,0 +1,14 @@
+{
+  "spellright.language": [
+    "en"
+  ],
+  "spellright.documentTypes": [
+    "markdown",
+    "latex",
+    "plaintext"
+  ],
+  "editor.formatOnSave": true,
+  "cSpell.words": [
+    "Halvorsen"
+  ]
+}
