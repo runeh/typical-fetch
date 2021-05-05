@@ -1,21 +1,23 @@
-type HttpMethod = "get" | "post";
+import { URL } from 'url';
+import fetch from 'node-fetch';
+
+type HttpMethod = 'get' | 'post';
 
 interface CallRecord {
   getBody: (arg: any) => any;
   getHeader: ((arg: any) => any)[];
-  getPath: (arg: any) => any;
+  getPath?: (arg: any) => string;
   getQuery: ((arg: any) => any)[];
   map: ((arg: any) => any)[];
   mapError: ((arg: any) => any)[];
-  method: HttpMethod | undefined;
+  method?: HttpMethod;
   parse: (arg: any) => any;
 }
 
-class CallBuilder<Ret = never, Arg = never> {
+class CallBuilder<Ret = any, Arg = any> {
   private record: CallRecord = {
     getBody: (e) => e,
     getHeader: [],
-    getPath: (e) => e,
     getQuery: [],
     map: [],
     mapError: [],
@@ -28,9 +30,17 @@ class CallBuilder<Ret = never, Arg = never> {
     return this;
   }
 
-  // withArg<T>(): CallBuilder<Ret, T> {
-  //   return this as any;
-  // }
+  withPath(path: string): this;
+  withPath(getPath: (args: Arg) => string): this;
+  withPath(pathOrFun: any) {
+    const fun = typeof pathOrFun === 'string' ? () => pathOrFun : pathOrFun;
+    this.record.getPath = fun;
+    return this;
+  }
+
+  withArg<T>(): CallBuilder<Ret, T> {
+    return this as any;
+  }
 
   // withPath(cb: (args: Arg) => string): CallBuilder<Ret, Arg>;
   // withPath(path: string): CallBuilder<Ret, Arg>;
@@ -65,12 +75,27 @@ class CallBuilder<Ret = never, Arg = never> {
   //   return this as any;
   // }
 
-  map<T>(parser: (raw: Ret) => T): CallBuilder<T, Arg> {
-    return this as any;
-  }
+  // map<T>(parser: (raw: Ret) => T): CallBuilder<T, Arg> {
+  //   return this as any;
+  // }
 
-  build(): (arg: Arg) => Promise<Ret> {
-    return {} as any;
+  build(): (baseUrl: string | URL, arg: Arg) => Promise<Ret> {
+    const { getPath } = this.record;
+    if (getPath == null) {
+      throw new Error('no path function');
+    }
+
+    const fun = async (baseUrl: string, args: any) => {
+      const path = getPath(args);
+
+      const url = new URL(path, baseUrl);
+      const res = await fetch(url, { method: this.record.method });
+      const text = await res.text();
+
+      return text;
+    };
+
+    return fun as any;
   }
 }
 

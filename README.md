@@ -14,9 +14,9 @@ builder, or by passing an object or something else.
 ```typescript
 const fetchUsers = typicalFetch
   .build()
-  .withMethod("GET")
-  .withHeaders({ Authorization: "anonymous" })
-  .withPath("/users.json");
+  .withMethod('GET')
+  .withHeaders({ Authorization: 'anonymous' })
+  .withPath('/users.json');
 
 type fetchUsersCall = () => Promise<
   | { success: true; error: undefined; response: unknown }
@@ -35,9 +35,9 @@ function parseUsers(raw: unknown): string[] {
 
 const fetchUsers = typicalFetch
   .build()
-  .withMethod("GET")
-  .withHeaders({ Authorization: "anonymous" })
-  .withPath("/users.json")
+  .withMethod('GET')
+  .withHeaders({ Authorization: 'anonymous' })
+  .withPath('/users.json')
   .withParser(parseUser);
 
 type fetchUsersCall = () => Promise<
@@ -66,17 +66,17 @@ function parseUsers(raw: string): string[] {
       id: rt.String,
       name: rt.String,
       signupDate: rt.String,
-    })
+    }),
   );
   return runtype.check(json);
 }
 
 const fetchUsers = typicalFetch
   .build()
-  .withArguments<{ token: string; orgId: string; sortOrder: "asc" | "desc" }>()
-  .withMethod("GET")
+  .withArguments<{ token: string; orgId: string; sortOrder: 'asc' | 'desc' }>()
+  .withMethod('GET')
   .withPath((args) => `/org/${args.orgId}/users`)
-  .withHeaders({ "User-Agent": "typical-fetch" })
+  .withHeaders({ 'User-Agent': 'typical-fetch' })
   .withHeaders((args) => ({ Authorization: `Bearer ${args.token}` }))
   .withParser(parseUsers)
   .map((res) => {
@@ -91,12 +91,12 @@ const fetchUsers = typicalFetch
     // map whatever error can occur to a well known type. Usually you'd
     // have a number of well known error types that can be returned
     if (err instanceof rt.ValidationError) {
-      return { name: "validationError" };
+      return { name: 'validationError' };
     } else if (err instanceof HttpError) {
       // httperror is provided by typical-fetch, to signal 404 and whatever
-      return { name: "httpError", status: err.status };
+      return { name: 'httpError', status: err.status };
     } else {
-      return { name: "unknown error!" };
+      return { name: 'unknown error!' };
     }
   });
 
@@ -109,16 +109,21 @@ type FetchUsersCallResult = Array<{
 }>;
 
 type FetchUsersCallError =
-  | { name: "validationError" }
-  | { name: "httpError"; status: err.status }
-  | { name: "unknown error!" };
+  | { name: 'validationError' }
+  | { name: 'httpError'; status: err.status }
+  | { name: 'unknown error!' };
 
 type FethUsersCall = (args: {
   token: string;
   orgId: string;
-  sortOrder: "asc" | "desc";
+  sortOrder: 'asc' | 'desc';
 }) => Promise<
   | { success: true; result: FetchUsersCallResult; error: undefined }
   | { success: false; result: undefined; error: FetchUsersCallError }
 >;
 ```
+
+### todo
+
+- Narrow after calling `withMethod` and path?
+- support array path?
