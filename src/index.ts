@@ -14,7 +14,14 @@ interface CallRecord {
   parse: (arg: any) => any;
 }
 
-class CallBuilder<Ret = any, Arg = any> {
+// The `[]` is due to this:
+// https://github.com/microsoft/TypeScript/issues/23182#issuecomment-379091887
+
+type BuiltCall<Ret, Arg> = [Arg] extends [never]
+  ? (baseUrl: string) => Promise<Ret>
+  : (baseUrl: string, args: Arg) => Promise<Ret>;
+
+class CallBuilder<Ret = any, Arg = never> {
   private record: CallRecord = {
     getBody: (e) => e,
     getHeader: [],
@@ -79,7 +86,7 @@ class CallBuilder<Ret = any, Arg = any> {
   //   return this as any;
   // }
 
-  build(): (baseUrl: string | URL, arg: Arg) => Promise<Ret> {
+  build(): BuiltCall<Ret, Arg> {
     const { getPath } = this.record;
     if (getPath == null) {
       throw new Error('no path function');
@@ -102,22 +109,3 @@ class CallBuilder<Ret = any, Arg = any> {
 export function buildCall(): CallBuilder {
   return new CallBuilder();
 }
-
-// const lal = new CallBuilder()
-//   .withMethod("post")
-//   .withArg<{ foo: string }>()
-//   .withPath((e) => e.foo)
-//   .withParser((e) => {
-//     return { morradi: "mann" };
-//   })
-//   .map((e) => {
-//     return {
-//       fooooo: e.morradi,
-//     };
-//   })
-//   .map((e) => {
-//     return {
-//       baaaaar: e.fooooo,
-//     };
-//   })
-//   .build();

@@ -8,7 +8,7 @@ describe('typical-fetch', () => {
     it('string path', async () => {
       const scope = nock(baseUrl).get('/boop').reply(200, 'text body');
       const fetcher = buildCall().withPath('/boop').withMethod('get').build();
-      const res = await fetcher(baseUrl, 1);
+      const res = await fetcher(baseUrl);
       expect(res).toBeTruthy();
       expect(scope.isDone()).toEqual(true);
     });
@@ -19,7 +19,7 @@ describe('typical-fetch', () => {
         .withMethod('get')
         .withPath(() => '/boop')
         .build();
-      const res = await fetcher(baseUrl, 1);
+      const res = await fetcher(baseUrl);
       expect(res).toBeTruthy();
       expect(scope.isDone()).toEqual(true);
     });
