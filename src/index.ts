@@ -1,13 +1,15 @@
-import { URL } from 'url';
+import { URL, URLSearchParams } from 'url';
 import fetch from 'node-fetch';
 
 type HttpMethod = 'get' | 'post';
+
+type QueryParam = Record<string, string> | URLSearchParams;
 
 interface CallRecord {
   getBody: (arg: any) => any;
   getHeader: ((arg: any) => any)[];
   getPath?: (arg: any) => string;
-  getQuery: ((arg: any) => any)[];
+  getQuery: ((arg: any) => QueryParam)[];
   map: ((arg: any) => any)[];
   mapError: ((arg: any) => any)[];
   method?: HttpMethod;
@@ -32,6 +34,10 @@ class CallBuilder<Ret = any, Arg = never> {
     parse: (e) => e,
   };
 
+  withArg<T>(): CallBuilder<Ret, T> {
+    return this as any;
+  }
+
   withMethod(method: HttpMethod): CallBuilder<Ret, Arg> {
     this.record.method = method;
     return this;
@@ -45,15 +51,16 @@ class CallBuilder<Ret = any, Arg = never> {
     return this;
   }
 
-  withArg<T>(): CallBuilder<Ret, T> {
-    return this as any;
+  withQuery(headers: QueryParam): CallBuilder<Ret, Arg>;
+  withQuery(fun: (args: Arg) => QueryParam): CallBuilder<Ret, Arg>;
+  withQuery(funOrHeaders: any) {
+    if (typeof funOrHeaders === 'function') {
+      this.record.getQuery.push(funOrHeaders);
+    } else {
+      this.record.getQuery.push(() => funOrHeaders);
+    }
+    return this;
   }
-
-  // withPath(cb: (args: Arg) => string): CallBuilder<Ret, Arg>;
-  // withPath(path: string): CallBuilder<Ret, Arg>;
-  // withPath(a: any) {
-  //   return this;
-  // }
 
   // withHeaders(headers: Record<string, string>): CallBuilder<Ret, Arg>;
   // withHeaders(
@@ -94,8 +101,16 @@ class CallBuilder<Ret = any, Arg = never> {
 
     const fun = async (baseUrl: string, args: any) => {
       const path = getPath(args);
-
       const url = new URL(path, baseUrl);
+
+      this.record.getQuery
+        .map((e) => e(args))
+        .map((e) => new URLSearchParams(e))
+        .flatMap((e) => Array.from(e.entries()))
+        .forEach(([key, val]) => {
+          url.searchParams.append(key, val.toString());
+        });
+
       const res = await fetch(url, { method: this.record.method });
       const text = await res.text();
 

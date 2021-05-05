@@ -127,3 +127,4 @@ type FethUsersCall = (args: {
 
 - Narrow after calling `withMethod` and path?
 - support array path?
+- Does withPath(() => {}) work when there is no arg?
