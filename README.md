@@ -140,3 +140,4 @@ type FetchUsersCall = (args: {
 - copy record properly
 - rename `with`? Just remove it and have .method, .headers etc.
 - pass in args to parsers
+- pass in args to mappers

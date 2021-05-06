@@ -10,7 +10,7 @@ interface CallRecord {
   getHeaders: ((arg: any) => HeadersInit)[];
   getPath?: (arg: any) => string;
   getQuery: ((arg: any) => QueryParam)[];
-  map: ((arg: any) => any)[];
+  mappers: ((arg: any) => any)[];
   mapError: ((arg: any) => any)[];
   method?: HttpMethod;
   parse: (arg: any) => any;
@@ -52,7 +52,7 @@ class CallBuilder<Ret = void, Arg = never> {
       getBody: (e) => e,
       getHeaders: [],
       getQuery: [],
-      map: [],
+      mappers: [],
       mapError: [],
       method: undefined,
       parse: (e) => e,
@@ -100,6 +100,11 @@ class CallBuilder<Ret = void, Arg = never> {
     return new CallBuilder<Ret, Arg>(this.record);
   }
 
+  map<T>(mapper: (data: Ret) => T): CallBuilder<T, Arg> {
+    this.record.mappers.push(mapper);
+    return new CallBuilder<T, Arg>(this.record);
+  }
+
   // formData / json
   // withBody(headers: Record<string, string>): CallBuilder<Ret, Arg>;
   // withBody(
@@ -113,17 +118,20 @@ class CallBuilder<Ret = void, Arg = never> {
   //   return this as any;
   // }
 
-  // map<T>(parser: (raw: Ret) => T): CallBuilder<T, Arg> {
-  //   return this as any;
-  // }
-
   parseJson<T>(parser: (data: unknown) => T): CallBuilder<T, Arg> {
     this.record.parseJson = parser;
     return new CallBuilder<T, Arg>(this.record);
   }
 
   build(): BuiltCall<Ret, Arg> {
-    const { getPath, parseJson, getQuery, getHeaders, method } = this.record;
+    const {
+      getPath,
+      parseJson,
+      getQuery,
+      getHeaders,
+      method,
+      mappers,
+    } = this.record;
     if (getPath == null) {
       throw new Error('no path function');
     }
@@ -142,13 +150,21 @@ class CallBuilder<Ret = void, Arg = never> {
 
       const text = await res.text();
 
+      let data;
+
       if (parseJson) {
         const json = JSON.parse(text);
         const parsed = parseJson(json);
-        return parsed;
+        data = parsed;
       } else {
-        return text;
+        data = text;
       }
+
+      for (const mapper of mappers) {
+        data = mapper(data);
+      }
+
+      return data;
     };
 
     return fun as any;

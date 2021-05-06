@@ -187,9 +187,7 @@ describe('typical-fetch', () => {
       const fetcher = buildCall()
         .path('/boop')
         .method('get')
-        .parseJson((raw) => {
-          return raw as { user: { name: string } };
-        })
+        .parseJson((raw) => raw as { user: { name: string } })
         .build();
       const res = await fetcher(baseUrl);
       expect(res.user.name).toEqual('Rune');
@@ -197,5 +195,57 @@ describe('typical-fetch', () => {
     });
 
     it.todo('parser that gets args passed in');
+  });
+
+  describe('mappers', () => {
+    it('no body', async () => {
+      const scope = nock(baseUrl)
+        .get('/boop')
+        .reply(200, { user: { name: 'Rune' } });
+
+      const fetcher = buildCall()
+        .path('/boop')
+        .method('get')
+        .map((e) => ({ name: 'Rune' }))
+        .build();
+      const res = await fetcher(baseUrl);
+      expect(res.name).toEqual('Rune');
+      expect(scope.isDone()).toEqual(true);
+    });
+
+    it('single mapper', async () => {
+      const scope = nock(baseUrl)
+        .get('/boop')
+        .reply(200, { user: { name: 'Rune' } });
+
+      const fetcher = buildCall()
+        .path('/boop')
+        .method('get')
+        .parseJson((raw) => raw as { user: { name: string } })
+        .map((e) => e.user.name.toUpperCase())
+        .build();
+      const res = await fetcher(baseUrl);
+      expect(res).toEqual('RUNE');
+      expect(scope.isDone()).toEqual(true);
+    });
+
+    it('multiple mappers', async () => {
+      const scope = nock(baseUrl)
+        .get('/boop')
+        .reply(200, { user: { name: 'Rune' } });
+
+      const fetcher = buildCall()
+        .path('/boop')
+        .method('get')
+        .parseJson((raw) => raw as { user: { name: string } })
+        .map((e) => e.user.name)
+        .map((e) => e.toUpperCase())
+        .build();
+      const res = await fetcher(baseUrl);
+      expect(res).toEqual('RUNE');
+      expect(scope.isDone()).toEqual(true);
+    });
+
+    it.todo('mapper that gets args passed in');
   });
 });
