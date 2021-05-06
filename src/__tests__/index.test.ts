@@ -141,4 +141,54 @@ describe('typical-fetch', () => {
       expect(scope.isDone()).toEqual(true);
     });
   });
+
+  describe('header parameters', () => {
+    it('object', async () => {
+      const scope = nock(baseUrl)
+        .get('/boop')
+        .reply(200, 'text body')
+        .matchHeader('User-Agent', 'typical-fetch');
+      const fetcher = buildCall()
+        .withPath('/boop')
+        .withMethod('get')
+        .withHeaders({ 'User-Agent': 'typical-fetch' })
+        .build();
+      const res = await fetcher(baseUrl);
+      expect(res).toBeTruthy();
+      expect(scope.isDone()).toEqual(true);
+    });
+
+    it('callback', async () => {
+      const scope = nock(baseUrl)
+        .get('/boop')
+        .reply(200, 'text body')
+        .matchHeader('User-Agent', 'typical-fetch');
+      const fetcher = buildCall()
+        .withPath('/boop')
+        .withMethod('get')
+        .withArg<string>()
+        .withHeaders((ua) => ({ 'User-Agent': ua }))
+        .build();
+      const res = await fetcher(baseUrl, 'typical-fetch');
+      expect(res).toBeTruthy();
+      expect(scope.isDone()).toEqual(true);
+    });
+
+    it('multiple objects', async () => {
+      const scope = nock(baseUrl)
+        .get('/boop')
+        .reply(200, 'text body')
+        .matchHeader('User-Agent', 'typical-fetch')
+        .matchHeader('token', 'abcd');
+      const fetcher = buildCall()
+        .withHeaders({ token: 'abcd' })
+        .withPath('/boop')
+        .withMethod('get')
+        .withHeaders({ 'User-Agent': 'typical-fetch' })
+        .build();
+      const res = await fetcher(baseUrl);
+      expect(res).toBeTruthy();
+      expect(scope.isDone()).toEqual(true);
+    });
+  });
 });

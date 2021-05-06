@@ -1,19 +1,32 @@
 import { URL, URLSearchParams } from 'url';
-import fetch from 'node-fetch';
+import fetch, { Headers, HeadersInit } from 'node-fetch';
 
-type HttpMethod = 'get' | 'post';
+type HttpMethod = 'delete' | 'get' | 'head' | 'patch' | 'post' | 'put';
 
 type QueryParam = Record<string, string> | URLSearchParams;
 
 interface CallRecord {
   getBody: (arg: any) => any;
-  getHeader: ((arg: any) => any)[];
+  getHeaders: ((arg: any) => HeadersInit)[];
   getPath?: (arg: any) => string;
   getQuery: ((arg: any) => QueryParam)[];
   map: ((arg: any) => any)[];
   mapError: ((arg: any) => any)[];
   method?: HttpMethod;
   parse: (arg: any) => any;
+}
+
+function mergeHeaders(defs: HeadersInit[]): Headers {
+  const headersList = defs.flatMap((e) => {
+    if (Array.isArray(e)) {
+      return e;
+    } else if (e instanceof Headers) {
+      return Array.from(e.entries());
+    } else {
+      return Object.entries(e);
+    }
+  });
+  return new Headers(headersList);
 }
 
 // The `[]` is due to this:
@@ -26,7 +39,7 @@ type BuiltCall<Ret, Arg> = [Arg] extends [never]
 class CallBuilder<Ret = any, Arg = never> {
   private record: CallRecord = {
     getBody: (e) => e,
-    getHeader: [],
+    getHeaders: [],
     getQuery: [],
     map: [],
     mapError: [],
@@ -53,22 +66,25 @@ class CallBuilder<Ret = any, Arg = never> {
 
   withQuery(headers: QueryParam): CallBuilder<Ret, Arg>;
   withQuery(fun: (args: Arg) => QueryParam): CallBuilder<Ret, Arg>;
-  withQuery(funOrHeaders: any) {
-    if (typeof funOrHeaders === 'function') {
-      this.record.getQuery.push(funOrHeaders);
+  withQuery(funOrQuery: any) {
+    if (typeof funOrQuery === 'function') {
+      this.record.getQuery.push(funOrQuery);
     } else {
-      this.record.getQuery.push(() => funOrHeaders);
+      this.record.getQuery.push(() => funOrQuery);
     }
     return this;
   }
 
-  // withHeaders(headers: Record<string, string>): CallBuilder<Ret, Arg>;
-  // withHeaders(
-  //   fun: (args: Arg) => Record<string, string>
-  // ): CallBuilder<Ret, Arg>;
-  // withHeaders(a: any): CallBuilder<Ret, Arg> {
-  //   return this;
-  // }
+  withHeaders(headers: HeadersInit): CallBuilder<Ret, Arg>;
+  withHeaders(fun: (args: Arg) => HeadersInit): CallBuilder<Ret, Arg>;
+  withHeaders(funOrHeaders: any): CallBuilder<Ret, Arg> {
+    if (typeof funOrHeaders === 'function') {
+      this.record.getHeaders.push(funOrHeaders);
+    } else {
+      this.record.getHeaders.push(() => funOrHeaders);
+    }
+    return this;
+  }
 
   // withQuery(headers: Record<string, string>): CallBuilder<Ret, Arg>;
   // withQuery(fun: (args: Arg) => Record<string, string>): CallBuilder<Ret, Arg>;
@@ -111,7 +127,9 @@ class CallBuilder<Ret = any, Arg = never> {
           url.searchParams.append(key, val.toString());
         });
 
-      const res = await fetch(url, { method: this.record.method });
+      const headers = mergeHeaders(this.record.getHeaders.map((e) => e(args)));
+
+      const res = await fetch(url, { method: this.record.method, headers });
       const text = await res.text();
 
       return text;

@@ -128,3 +128,12 @@ type FethUsersCall = (args: {
 - Narrow after calling `withMethod` and path?
 - support array path?
 - Does withPath(() => {}) work when there is no arg?
+- Return new objects when building, so it's possible to chain stuff of another
+  builder. Might fix some type problems?
+- Make CallRecord typed ?
+- jsonbody
+- formbody
+- filebody
+- adapter for runtypes/typanion etc examples
+- mergeSearchParams function
+- Automatica header stuff for json/form/file bodies
