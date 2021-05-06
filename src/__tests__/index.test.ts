@@ -8,7 +8,7 @@ describe('typical-fetch', () => {
   describe('string path', () => {
     it('string path', async () => {
       const scope = nock(baseUrl).get('/boop').reply(200, 'text body');
-      const fetcher = buildCall().withPath('/boop').withMethod('get').build();
+      const fetcher = buildCall().path('/boop').method('get').build();
       const res = await fetcher(baseUrl);
       expect(res).toBeTruthy();
       expect(scope.isDone()).toEqual(true);
@@ -17,8 +17,8 @@ describe('typical-fetch', () => {
     it('callback path no args', async () => {
       const scope = nock(baseUrl).get('/boop').reply(200, 'text body');
       const fetcher = buildCall()
-        .withMethod('get')
-        .withPath(() => '/boop')
+        .method('get')
+        .path(() => '/boop')
         .build();
       const res = await fetcher(baseUrl);
       expect(res).toBeTruthy();
@@ -28,9 +28,9 @@ describe('typical-fetch', () => {
     it('callback path with args', async () => {
       const scope = nock(baseUrl).get('/name/rune').reply(200, 'text body');
       const fetcher = buildCall()
-        .withMethod('get')
-        .withArg<{ name: string }>()
-        .withPath((e) => `/name/${e.name}`)
+        .method('get')
+        .args<{ name: string }>()
+        .path((e) => `/name/${e.name}`)
         .build();
       const res = await fetcher(baseUrl, { name: 'rune' });
       expect(res).toBeTruthy();
@@ -42,9 +42,9 @@ describe('typical-fetch', () => {
     it('object', async () => {
       const scope = nock(baseUrl).get('/boop?foo=bar').reply(200, 'text body');
       const fetcher = buildCall()
-        .withPath('/boop')
-        .withMethod('get')
-        .withQuery({ foo: 'bar' })
+        .path('/boop')
+        .method('get')
+        .query({ foo: 'bar' })
         .build();
       const res = await fetcher(baseUrl);
       expect(res).toBeTruthy();
@@ -56,10 +56,10 @@ describe('typical-fetch', () => {
         .get('/boop?foo=bar&baz=phlebotinum')
         .reply(200, 'text body');
       const fetcher = buildCall()
-        .withPath('/boop')
-        .withMethod('get')
-        .withQuery({ foo: 'bar' })
-        .withQuery({ baz: 'phlebotinum' })
+        .path('/boop')
+        .method('get')
+        .query({ foo: 'bar' })
+        .query({ baz: 'phlebotinum' })
         .build();
       const res = await fetcher(baseUrl);
       expect(res).toBeTruthy();
@@ -72,10 +72,10 @@ describe('typical-fetch', () => {
         .get('/boop?foo=first&foo=second')
         .reply(200, 'text body');
       const fetcher = buildCall()
-        .withPath('/boop')
-        .withMethod('get')
-        .withQuery({ foo: 'first' })
-        .withQuery({ foo: 'second' })
+        .path('/boop')
+        .method('get')
+        .query({ foo: 'first' })
+        .query({ foo: 'second' })
         .build();
       const res = await fetcher(baseUrl);
       expect(res).toBeTruthy();
@@ -87,9 +87,9 @@ describe('typical-fetch', () => {
         .get('/boop?foo=first')
         .reply(200, 'text body');
       const fetcher = buildCall()
-        .withPath('/boop')
-        .withMethod('get')
-        .withQuery(() => ({ foo: 'first' }))
+        .path('/boop')
+        .method('get')
+        .query(() => ({ foo: 'first' }))
         .build();
       const res = await fetcher(baseUrl);
       expect(res).toBeTruthy();
@@ -101,9 +101,9 @@ describe('typical-fetch', () => {
         .get('/boop?foo=first')
         .reply(200, 'text body');
       const fetcher = buildCall()
-        .withPath('/boop')
-        .withMethod('get')
-        .withQuery(new URLSearchParams({ foo: 'first' }))
+        .path('/boop')
+        .method('get')
+        .query(new URLSearchParams({ foo: 'first' }))
         .build();
       const res = await fetcher(baseUrl);
       expect(res).toBeTruthy();
@@ -115,10 +115,10 @@ describe('typical-fetch', () => {
         .get('/boop?foo=first')
         .reply(200, 'text body');
       const fetcher = buildCall()
-        .withPath('/boop')
-        .withMethod('get')
-        .withArg<{ value: string }>()
-        .withQuery((e) => new URLSearchParams({ foo: e.value }))
+        .path('/boop')
+        .method('get')
+        .args<{ value: string }>()
+        .query((e) => new URLSearchParams({ foo: e.value }))
         .build();
       const res = await fetcher(baseUrl, { value: 'first' });
       expect(res).toBeTruthy();
@@ -130,11 +130,11 @@ describe('typical-fetch', () => {
         .get('/boop?foo=first&name=rune')
         .reply(200, 'text body');
       const fetcher = buildCall()
-        .withPath('/boop')
-        .withMethod('get')
-        .withArg<{ value: string }>()
-        .withQuery((e) => new URLSearchParams({ foo: e.value }))
-        .withQuery({ name: 'rune' })
+        .path('/boop')
+        .method('get')
+        .args<{ value: string }>()
+        .query((e) => new URLSearchParams({ foo: e.value }))
+        .query({ name: 'rune' })
         .build();
       const res = await fetcher(baseUrl, { value: 'first' });
       expect(res).toBeTruthy();
@@ -149,9 +149,9 @@ describe('typical-fetch', () => {
         .reply(200, 'text body')
         .matchHeader('User-Agent', 'typical-fetch');
       const fetcher = buildCall()
-        .withPath('/boop')
-        .withMethod('get')
-        .withHeaders({ 'User-Agent': 'typical-fetch' })
+        .path('/boop')
+        .method('get')
+        .headers({ 'User-Agent': 'typical-fetch' })
         .build();
       const res = await fetcher(baseUrl);
       expect(res).toBeTruthy();
@@ -164,10 +164,10 @@ describe('typical-fetch', () => {
         .reply(200, 'text body')
         .matchHeader('User-Agent', 'typical-fetch');
       const fetcher = buildCall()
-        .withPath('/boop')
-        .withMethod('get')
-        .withArg<string>()
-        .withHeaders((ua) => ({ 'User-Agent': ua }))
+        .path('/boop')
+        .method('get')
+        .args<string>()
+        .headers((ua) => ({ 'User-Agent': ua }))
         .build();
       const res = await fetcher(baseUrl, 'typical-fetch');
       expect(res).toBeTruthy();
@@ -181,10 +181,10 @@ describe('typical-fetch', () => {
         .matchHeader('User-Agent', 'typical-fetch')
         .matchHeader('token', 'abcd');
       const fetcher = buildCall()
-        .withHeaders({ token: 'abcd' })
-        .withPath('/boop')
-        .withMethod('get')
-        .withHeaders({ 'User-Agent': 'typical-fetch' })
+        .headers({ token: 'abcd' })
+        .path('/boop')
+        .method('get')
+        .headers({ 'User-Agent': 'typical-fetch' })
         .build();
       const res = await fetcher(baseUrl);
       expect(res).toBeTruthy();

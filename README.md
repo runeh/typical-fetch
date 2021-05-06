@@ -14,9 +14,9 @@ builder, or by passing an object or something else.
 ```typescript
 const fetchUsers = typicalFetch
   .build()
-  .withMethod('GET')
-  .withHeaders({ Authorization: 'anonymous' })
-  .withPath('/users.json');
+  .method('GET')
+  .headers({ Authorization: 'anonymous' })
+  .path('/users.json');
 
 type fetchUsersCall = () => Promise<
   | { success: true; error: undefined; response: unknown }
@@ -35,10 +35,10 @@ function parseUsers(raw: unknown): string[] {
 
 const fetchUsers = typicalFetch
   .build()
-  .withMethod('GET')
-  .withHeaders({ Authorization: 'anonymous' })
-  .withPath('/users.json')
-  .withParser(parseUser);
+  .method('GET')
+  .headers({ Authorization: 'anonymous' })
+  .path('/users.json')
+  .parser(parseUser);
 
 type fetchUsersCall = () => Promise<
   | { success: true; error: undefined; response: string[] }
@@ -73,12 +73,12 @@ function parseUsers(raw: string): string[] {
 
 const fetchUsers = typicalFetch
   .build()
-  .withArguments<{ token: string; orgId: string; sortOrder: 'asc' | 'desc' }>()
-  .withMethod('GET')
-  .withPath((args) => `/org/${args.orgId}/users`)
-  .withHeaders({ 'User-Agent': 'typical-fetch' })
-  .withHeaders((args) => ({ Authorization: `Bearer ${args.token}` }))
-  .withParser(parseUsers)
+  .arguments<{ token: string; orgId: string; sortOrder: 'asc' | 'desc' }>()
+  .method('GET')
+  .path((args) => `/org/${args.orgId}/users`)
+  .headers({ 'User-Agent': 'typical-fetch' })
+  .headers((args) => ({ Authorization: `Bearer ${args.token}` }))
+  .parser(parseUsers)
   .map((res) => {
     // res is the return from parseUser
     // this function can do whatever transforms it wants. In this case, convert
@@ -138,3 +138,4 @@ type FethUsersCall = (args: {
 - mergeSearchParams function
 - Automatica header stuff for json/form/file bodies
 - copy record properly
+- rename `with`? Just remove it and have .method, .headers etc.

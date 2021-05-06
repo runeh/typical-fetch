@@ -51,26 +51,26 @@ class CallBuilder<Ret = void, Arg = never> {
     };
   }
 
-  withArg<T>(): CallBuilder<Ret, T> {
+  args<T>(): CallBuilder<Ret, T> {
     return new CallBuilder(this.record);
   }
 
-  withMethod(method: HttpMethod): CallBuilder<Ret, Arg> {
+  method(method: HttpMethod): CallBuilder<Ret, Arg> {
     this.record.method = method;
     return new CallBuilder(this.record);
   }
 
-  withPath(path: string): this;
-  withPath(getPath: (args: Arg) => string): this;
-  withPath(pathOrFun: string | ((args: Arg) => string)) {
+  path(path: string): this;
+  path(getPath: (args: Arg) => string): this;
+  path(pathOrFun: string | ((args: Arg) => string)) {
     const fun = typeof pathOrFun === 'string' ? () => pathOrFun : pathOrFun;
     this.record.getPath = fun;
     return new CallBuilder<Ret, Arg>(this.record);
   }
 
-  withQuery(headers: QueryParam): CallBuilder<Ret, Arg>;
-  withQuery(fun: (args: Arg) => QueryParam): CallBuilder<Ret, Arg>;
-  withQuery(funOrQuery: QueryParam | ((args: Arg) => QueryParam)) {
+  query(headers: QueryParam): CallBuilder<Ret, Arg>;
+  query(fun: (args: Arg) => QueryParam): CallBuilder<Ret, Arg>;
+  query(funOrQuery: QueryParam | ((args: Arg) => QueryParam)) {
     if (typeof funOrQuery === 'function') {
       this.record.getQuery.push(funOrQuery);
     } else {
@@ -79,9 +79,9 @@ class CallBuilder<Ret = void, Arg = never> {
     return new CallBuilder<Ret, Arg>(this.record);
   }
 
-  withHeaders(headers: HeadersInit): CallBuilder<Ret, Arg>;
-  withHeaders(fun: (args: Arg) => HeadersInit): CallBuilder<Ret, Arg>;
-  withHeaders(
+  headers(headers: HeadersInit): CallBuilder<Ret, Arg>;
+  headers(fun: (args: Arg) => HeadersInit): CallBuilder<Ret, Arg>;
+  headers(
     funOrHeaders: HeadersInit | ((args: Arg) => HeadersInit),
   ): CallBuilder<Ret, Arg> {
     if (typeof funOrHeaders === 'function') {
