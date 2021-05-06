@@ -168,6 +168,7 @@ class CallBuilder<Ret = void, Arg = never> {
       method,
       parseJson,
     } = this.record;
+
     if (getPath == null) {
       throw new Error('no path function');
     }

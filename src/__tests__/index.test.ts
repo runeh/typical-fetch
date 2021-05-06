@@ -1,6 +1,7 @@
 import { URLSearchParams } from 'url';
 import FormData from 'form-data';
 import nock from 'nock';
+import { Headers } from 'node-fetch';
 import { buildCall } from '../index';
 
 const baseUrl = 'http://www.example.org';
@@ -170,6 +171,38 @@ describe('typical-fetch', () => {
       expect(scope.isDone()).toEqual(true);
     });
 
+    it('array', async () => {
+      const scope = nock(baseUrl)
+        .get('/boop')
+        .reply(200, 'text body')
+        .matchHeader('User-Agent', 'typical-fetch');
+      const fetcher = buildCall()
+        .path('/boop')
+        .method('get')
+        .headers([['User-Agent', 'typical-fetch']])
+        .build();
+
+      await fetcher(baseUrl);
+
+      expect(scope.isDone()).toEqual(true);
+    });
+
+    it('Header', async () => {
+      const scope = nock(baseUrl)
+        .get('/boop')
+        .reply(200, 'text body')
+        .matchHeader('User-Agent', 'typical-fetch');
+      const fetcher = buildCall()
+        .path('/boop')
+        .method('get')
+        .headers(new Headers({ 'User-Agent': 'typical-fetch' }))
+        .build();
+
+      await fetcher(baseUrl);
+
+      expect(scope.isDone()).toEqual(true);
+    });
+
     it('callback', async () => {
       const scope = nock(baseUrl)
         .get('/boop')
@@ -302,6 +335,23 @@ describe('typical-fetch', () => {
       expect(scope.isDone()).toEqual(true);
     });
 
+    it('text literal callback', async () => {
+      const scope = nock(baseUrl)
+        .post('/boop', 'heloes!')
+        .matchHeader('content-type', 'text/plain')
+        .reply(200);
+
+      const fetcher = buildCall()
+        .path('/boop')
+        .method('post')
+        .body(() => 'heloes!')
+        .build();
+
+      await fetcher(baseUrl);
+
+      expect(scope.isDone()).toEqual(true);
+    });
+
     it('json', async () => {
       const scope = nock(baseUrl)
         .post('/boop', { name: 'Rune' })
@@ -374,6 +424,10 @@ describe('typical-fetch', () => {
 
     it('rejects multiple bodies', async () => {
       expect(() => buildCall().body('foo').body('bar')).toThrow();
+    });
+
+    it('rejects when missing path', async () => {
+      expect(() => buildCall().build()).toThrow();
     });
   });
 });
