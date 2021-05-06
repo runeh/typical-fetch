@@ -25,7 +25,7 @@ interface CallRecord {
   getPath?: (arg: any) => string;
   getQuery: ((arg: any) => QueryParam)[];
   mapError: ((arg: any) => unknown)[];
-  mappers: ((arg: any) => unknown)[];
+  mappers: ((res: any, arg: any) => unknown)[];
   method?: HttpMethod;
   parseJson?: (arg: unknown) => unknown;
 }
@@ -136,7 +136,7 @@ class CallBuilder<Ret = void, Arg = never> {
     return new CallBuilder<Ret, Arg>(this.record);
   }
 
-  map<T>(mapper: (data: Ret) => T): CallBuilder<T, Arg> {
+  map<T>(mapper: (data: Ret, args: Arg) => T): CallBuilder<T, Arg> {
     this.record.mappers.push(mapper);
     return new CallBuilder<T, Arg>(this.record);
   }
@@ -206,7 +206,7 @@ class CallBuilder<Ret = void, Arg = never> {
       }
 
       for (const mapper of mappers) {
-        data = mapper(data);
+        data = mapper(data, args);
       }
 
       return data;

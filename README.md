@@ -129,7 +129,7 @@ type FetchUsersCall = (args: {
 - Support array as return value from `path`? As in
   `['users', userId,'pages',pageNum]` turns into
   `/users/${userId}/pages/${pageNum}`
-- Make CallRecord typed ?
+- Make CallRecord typed?
 - adapter for runtypes/typanion etc examples
 - copy record properly
 - multiple .args calls allowed?
@@ -141,5 +141,6 @@ type FetchUsersCall = (args: {
 - Error handling
 - Tests for methods?
 - Errors if trying to use body with GET etc?
+- follow redirects?
+- support parser fun for args?
 - pass in args to parsers
-- pass in args to mappers

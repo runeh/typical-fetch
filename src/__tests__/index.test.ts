@@ -295,6 +295,25 @@ describe('typical-fetch', () => {
       expect(scope.isDone()).toEqual(true);
     });
 
+    it('gets args', async () => {
+      const scope = nock(baseUrl)
+        .get('/boop')
+        .reply(200, { user: { name: 'Rune' } });
+
+      const fetcher = buildCall()
+        .path('/boop')
+        .method('get')
+        .args<{ name: string }>()
+        .parseJson((raw) => raw as { user: { name: string } })
+        .map((data, args) => data.user.name.toUpperCase() + args.name)
+        .build();
+
+      const res = await fetcher(baseUrl, { name: 'foo' });
+
+      expect(res).toEqual('RUNEfoo');
+      expect(scope.isDone()).toEqual(true);
+    });
+
     it('multiple mappers', async () => {
       const scope = nock(baseUrl)
         .get('/boop')
