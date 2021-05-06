@@ -130,23 +130,17 @@ type FetchUsersCall = (args: {
   `['users', userId,'pages',pageNum]` turns into
   `/users/${userId}/pages/${pageNum}`
 - Make CallRecord typed ?
-- methods for passing body
-  - jsonbody
-  - formbody
-  - filebody (same as form?)
 - adapter for runtypes/typanion etc examples
-- Automatic header stuff for json/form/file bodies
 - copy record properly
 - multiple .args calls allowed?
-- pass in args to parsers
-- pass in args to mappers
 - pass response to mappers? Wrap it in a proxy that throws if you try to
   edit/call it?
 - can parseJson just add two parsers? one for text->unknown and then the user
   provided one?
 - Add kitchen sink tests
 - Error handling
-- Return type
 - Errors if trying to call .body multiple times or similar
 - Tests for methods
 - Errors if trying to use body with GET etc?
+- pass in args to parsers
+- pass in args to mappers

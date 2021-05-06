@@ -358,5 +358,8 @@ describe('typical-fetch', () => {
 
       expect(scope.isDone()).toEqual(true);
     });
+
+    it.todo('stream test');
+    it.todo('buffer');
   });
 });
