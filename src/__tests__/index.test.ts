@@ -248,4 +248,21 @@ describe('typical-fetch', () => {
 
     it.todo('mapper that gets args passed in');
   });
+
+  describe('request bodies', () => {
+    it('text literal', async () => {
+      const scope = nock(baseUrl)
+        .post('/boop', 'heloes!')
+        .matchHeader('content-type', 'text/plain')
+        .reply(200);
+
+      const fetcher = buildCall()
+        .path('/boop')
+        .method('post')
+        .body('heloes!')
+        .build();
+      await fetcher(baseUrl);
+      expect(scope.isDone()).toEqual(true);
+    });
+  });
 });

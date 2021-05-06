@@ -147,3 +147,6 @@ type FetchUsersCall = (args: {
 - Add kitchen sink tests
 - Error handling
 - Return type
+- Errors if trying to call .body multiple times or similar
+- Tests for methods
+- Errors if trying to use body with GET etc?

@@ -1,12 +1,25 @@
+import { Readable } from 'stream';
 import { URL, URLSearchParams } from 'url';
-import fetch, { Headers, HeadersInit } from 'node-fetch';
+import FormData from 'form-data';
+import fetch, {
+  Headers,
+  HeadersInit,
+  BodyInit as OriginalBodyInit,
+} from 'node-fetch';
+import { JsonRoot } from './json-typings';
+
+type BodyInit =
+  | Exclude<OriginalBodyInit, ArrayBufferView | NodeJS.ReadableStream>
+  | Readable;
 
 type HttpMethod = 'delete' | 'get' | 'head' | 'patch' | 'post' | 'put';
 
 type QueryParam = Record<string, string> | URLSearchParams;
 
+type BodyType = JsonRoot | BodyInit;
+
 interface CallRecord {
-  getBody: (arg: unknown) => unknown;
+  getBody?: (arg: any) => BodyType;
   getHeaders: ((arg: any) => HeadersInit)[];
   getPath?: (arg: any) => string;
   getQuery: ((arg: any) => QueryParam)[];
@@ -15,6 +28,27 @@ interface CallRecord {
   method?: HttpMethod;
   parse: (arg: unknown) => unknown;
   parseJson?: (arg: unknown) => unknown;
+}
+
+function getBodyInfo(
+  data: BodyType | undefined,
+): { body?: BodyInit; contentType?: string } {
+  if (data === undefined) {
+    return {};
+  } else if (typeof data === 'string') {
+    return { body: data, contentType: 'text/plain' };
+  } else if (
+    data instanceof ArrayBuffer ||
+    data instanceof Readable ||
+    data instanceof URLSearchParams ||
+    data instanceof FormData
+  ) {
+    return { body: data };
+  } else {
+    // must be json at this point
+    // fixme: what about things that throw here? Can that happen?
+    return { body: JSON.stringify(data), contentType: 'application/json' };
+  }
 }
 
 function mergeQueryParams(defs: QueryParam[]): URLSearchParams {
@@ -49,12 +83,10 @@ class CallBuilder<Ret = void, Arg = never> {
 
   constructor(record?: CallRecord) {
     this.record = record ?? {
-      getBody: (e) => e,
       getHeaders: [],
       getQuery: [],
       mappers: [],
       mapError: [],
-      method: undefined,
       parse: (e) => e,
     };
   }
@@ -71,8 +103,11 @@ class CallBuilder<Ret = void, Arg = never> {
   path(path: string): this;
   path(getPath: (args: Arg) => string): this;
   path(pathOrFun: string | ((args: Arg) => string)) {
-    const fun = typeof pathOrFun === 'string' ? () => pathOrFun : pathOrFun;
-    this.record.getPath = fun;
+    if (typeof pathOrFun === 'function') {
+      this.record.getPath = pathOrFun;
+    } else {
+      this.record.getPath = () => pathOrFun;
+    }
     return new CallBuilder<Ret, Arg>(this.record);
   }
 
@@ -105,14 +140,16 @@ class CallBuilder<Ret = void, Arg = never> {
     return new CallBuilder<T, Arg>(this.record);
   }
 
-  // formData / json
-  // withBody(headers: Record<string, string>): CallBuilder<Ret, Arg>;
-  // withBody(
-  //   fun: (args: Arg) => Record<string, string>
-  // ): CallBuilder<Ret, Arg>;
-  // withBody(a: any): CallBuilder<Ret, Arg> {
-  //   return this;
-  // }
+  body(data: BodyType): this;
+  body(fun: (args: Arg) => BodyType): this;
+  body(funOrData: ((args: Arg) => BodyType) | BodyType) {
+    if (typeof funOrData === 'function') {
+      this.record.getBody = funOrData;
+    } else {
+      this.record.getBody = () => funOrData;
+    }
+    return new CallBuilder<Ret, Arg>(this.record);
+  }
 
   parseJson<T>(parser: (data: unknown) => T): CallBuilder<T, Arg> {
     this.record.parseJson = parser;
@@ -121,12 +158,13 @@ class CallBuilder<Ret = void, Arg = never> {
 
   build(): BuiltCall<Ret, Arg> {
     const {
-      getPath,
-      parseJson,
-      getQuery,
+      getBody,
       getHeaders,
-      method,
+      getPath,
+      getQuery,
       mappers,
+      method,
+      parseJson,
     } = this.record;
     if (getPath == null) {
       throw new Error('no path function');
@@ -142,17 +180,27 @@ class CallBuilder<Ret = void, Arg = never> {
 
       const headers = mergeHeaders(getHeaders.map((e) => e(args)));
 
-      const res = await fetch(url, { method: method, headers });
+      const rawBody = getBody ? getBody(args) : undefined;
 
-      const text = await res.text();
+      const { body, contentType } = getBodyInfo(rawBody);
+
+      if (contentType) {
+        // fixme: might need more headers?
+        headers.set('content-type', contentType);
+      }
+
+      const res = await fetch(url, { method: method, headers, body });
 
       let data;
 
       if (parseJson) {
+        const text = await res.text();
         const json = JSON.parse(text);
         const parsed = parseJson(json);
         data = parsed;
       } else {
+        // fixme: might be binary or whatevs
+        const text = await res.text();
         data = text;
       }
 
