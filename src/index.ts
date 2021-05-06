@@ -6,15 +6,15 @@ type HttpMethod = 'delete' | 'get' | 'head' | 'patch' | 'post' | 'put';
 type QueryParam = Record<string, string> | URLSearchParams;
 
 interface CallRecord {
-  getBody: (arg: any) => any;
+  getBody: (arg: unknown) => unknown;
   getHeaders: ((arg: any) => HeadersInit)[];
   getPath?: (arg: any) => string;
   getQuery: ((arg: any) => QueryParam)[];
-  mappers: ((arg: any) => any)[];
-  mapError: ((arg: any) => any)[];
+  mappers: ((arg: any) => unknown)[];
+  mapError: ((arg: any) => unknown)[];
   method?: HttpMethod;
-  parse: (arg: any) => any;
-  parseJson?: (arg: any) => any;
+  parse: (arg: unknown) => unknown;
+  parseJson?: (arg: unknown) => unknown;
 }
 
 function mergeQueryParams(defs: QueryParam[]): URLSearchParams {
@@ -112,10 +112,6 @@ class CallBuilder<Ret = void, Arg = never> {
   // ): CallBuilder<Ret, Arg>;
   // withBody(a: any): CallBuilder<Ret, Arg> {
   //   return this;
-  // }
-
-  // withParser<T>(parser: (raw: string) => T): CallBuilder<T, Arg> {
-  //   return this as any;
   // }
 
   parseJson<T>(parser: (data: unknown) => T): CallBuilder<T, Arg> {

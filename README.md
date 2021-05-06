@@ -125,19 +125,25 @@ type FetchUsersCall = (args: {
 
 ### todo
 
-- Narrow after calling `withMethod` and path?
-- support array path?
-- Does withPath(() => {}) work when there is no arg?
-- Return new objects when building, so it's possible to chain stuff of another
-  builder. Might fix some type problems?
+- Narrow after calling `method` and `path`?
+- Support array as return value from `path`? As in
+  `['users', userId,'pages',pageNum]` turns into
+  `/users/${userId}/pages/${pageNum}`
 - Make CallRecord typed ?
-- jsonbody
-- formbody
-- filebody
+- methods for passing body
+  - jsonbody
+  - formbody
+  - filebody (same as form?)
 - adapter for runtypes/typanion etc examples
-- mergeSearchParams function
-- Automatica header stuff for json/form/file bodies
+- Automatic header stuff for json/form/file bodies
 - copy record properly
-- rename `with`? Just remove it and have .method, .headers etc.
+- multiple .args calls allowed?
 - pass in args to parsers
 - pass in args to mappers
+- pass response to mappers? Wrap it in a proxy that throws if you try to
+  edit/call it?
+- can parseJson just add two parsers? one for text->unknown and then the user
+  provided one?
+- Add kitchen sink tests
+- Error handling
+- Return type
