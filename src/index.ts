@@ -140,14 +140,15 @@ class CallBuilder<Ret = void, Arg = never> {
 
       const res = await fetch(url, { method: method, headers });
 
+      const text = await res.text();
+
       if (parseJson) {
-        const text = await res.text();
         const json = JSON.parse(text);
         const parsed = parseJson(json);
         return parsed;
+      } else {
+        return text;
       }
-
-      // return text;
     };
 
     return fun as any;
