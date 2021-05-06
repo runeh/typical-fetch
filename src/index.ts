@@ -36,24 +36,28 @@ type BuiltCall<Ret, Arg> = [Arg] extends [never]
   ? (baseUrl: string) => Promise<Ret>
   : (baseUrl: string, args: Arg) => Promise<Ret>;
 
-class CallBuilder<Ret = any, Arg = never> {
-  private record: CallRecord = {
-    getBody: (e) => e,
-    getHeaders: [],
-    getQuery: [],
-    map: [],
-    mapError: [],
-    method: undefined,
-    parse: (e) => e,
-  };
+class CallBuilder<Ret = void, Arg = never> {
+  private record: CallRecord;
+
+  constructor(record?: CallRecord) {
+    this.record = record ?? {
+      getBody: (e) => e,
+      getHeaders: [],
+      getQuery: [],
+      map: [],
+      mapError: [],
+      method: undefined,
+      parse: (e) => e,
+    };
+  }
 
   withArg<T>(): CallBuilder<Ret, T> {
-    return this as any;
+    return new CallBuilder(this.record);
   }
 
   withMethod(method: HttpMethod): CallBuilder<Ret, Arg> {
     this.record.method = method;
-    return this;
+    return new CallBuilder(this.record);
   }
 
   withPath(path: string): this;
@@ -61,7 +65,7 @@ class CallBuilder<Ret = any, Arg = never> {
   withPath(pathOrFun: any) {
     const fun = typeof pathOrFun === 'string' ? () => pathOrFun : pathOrFun;
     this.record.getPath = fun;
-    return this;
+    return new CallBuilder<Ret, Arg>(this.record);
   }
 
   withQuery(headers: QueryParam): CallBuilder<Ret, Arg>;
@@ -72,7 +76,7 @@ class CallBuilder<Ret = any, Arg = never> {
     } else {
       this.record.getQuery.push(() => funOrQuery);
     }
-    return this;
+    return new CallBuilder<Ret, Arg>(this.record);
   }
 
   withHeaders(headers: HeadersInit): CallBuilder<Ret, Arg>;
@@ -83,7 +87,7 @@ class CallBuilder<Ret = any, Arg = never> {
     } else {
       this.record.getHeaders.push(() => funOrHeaders);
     }
-    return this;
+    return new CallBuilder<Ret, Arg>(this.record);
   }
 
   // withQuery(headers: Record<string, string>): CallBuilder<Ret, Arg>;

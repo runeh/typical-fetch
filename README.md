@@ -137,3 +137,4 @@ type FethUsersCall = (args: {
 - adapter for runtypes/typanion etc examples
 - mergeSearchParams function
 - Automatica header stuff for json/form/file bodies
+- copy record properly
