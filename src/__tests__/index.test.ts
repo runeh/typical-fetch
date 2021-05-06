@@ -1,4 +1,5 @@
 import { URLSearchParams } from 'url';
+import FormData from 'form-data';
 import nock from 'nock';
 import { buildCall } from '../index';
 
@@ -9,7 +10,9 @@ describe('typical-fetch', () => {
     it('string path', async () => {
       const scope = nock(baseUrl).get('/boop').reply(200, 'text body');
       const fetcher = buildCall().path('/boop').method('get').build();
+
       await fetcher(baseUrl);
+
       expect(scope.isDone()).toEqual(true);
     });
 
@@ -19,7 +22,9 @@ describe('typical-fetch', () => {
         .method('get')
         .path(() => '/boop')
         .build();
+
       await fetcher(baseUrl);
+
       expect(scope.isDone()).toEqual(true);
     });
 
@@ -30,7 +35,9 @@ describe('typical-fetch', () => {
         .args<{ name: string }>()
         .path((e) => `/name/${e.name}`)
         .build();
+
       await fetcher(baseUrl, { name: 'rune' });
+
       expect(scope.isDone()).toEqual(true);
     });
   });
@@ -43,7 +50,9 @@ describe('typical-fetch', () => {
         .method('get')
         .query({ foo: 'bar' })
         .build();
+
       await fetcher(baseUrl);
+
       expect(scope.isDone()).toEqual(true);
     });
 
@@ -57,7 +66,9 @@ describe('typical-fetch', () => {
         .query({ foo: 'bar' })
         .query({ baz: 'phlebotinum' })
         .build();
+
       await fetcher(baseUrl);
+
       expect(scope.isDone()).toEqual(true);
     });
 
@@ -72,7 +83,9 @@ describe('typical-fetch', () => {
         .query({ foo: 'first' })
         .query({ foo: 'second' })
         .build();
+
       await fetcher(baseUrl);
+
       expect(scope.isDone()).toEqual(true);
     });
 
@@ -85,7 +98,9 @@ describe('typical-fetch', () => {
         .method('get')
         .query(() => ({ foo: 'first' }))
         .build();
+
       await fetcher(baseUrl);
+
       expect(scope.isDone()).toEqual(true);
     });
 
@@ -98,7 +113,9 @@ describe('typical-fetch', () => {
         .method('get')
         .query(new URLSearchParams({ foo: 'first' }))
         .build();
+
       await fetcher(baseUrl);
+
       expect(scope.isDone()).toEqual(true);
     });
 
@@ -112,7 +129,9 @@ describe('typical-fetch', () => {
         .args<{ value: string }>()
         .query((e) => new URLSearchParams({ foo: e.value }))
         .build();
+
       await fetcher(baseUrl, { value: 'first' });
+
       expect(scope.isDone()).toEqual(true);
     });
 
@@ -127,7 +146,9 @@ describe('typical-fetch', () => {
         .query((e) => new URLSearchParams({ foo: e.value }))
         .query({ name: 'rune' })
         .build();
+
       await fetcher(baseUrl, { value: 'first' });
+
       expect(scope.isDone()).toEqual(true);
     });
   });
@@ -143,7 +164,9 @@ describe('typical-fetch', () => {
         .method('get')
         .headers({ 'User-Agent': 'typical-fetch' })
         .build();
+
       await fetcher(baseUrl);
+
       expect(scope.isDone()).toEqual(true);
     });
 
@@ -158,7 +181,9 @@ describe('typical-fetch', () => {
         .args<string>()
         .headers((ua) => ({ 'User-Agent': ua }))
         .build();
+
       await fetcher(baseUrl, 'typical-fetch');
+
       expect(scope.isDone()).toEqual(true);
     });
 
@@ -174,7 +199,9 @@ describe('typical-fetch', () => {
         .method('get')
         .headers({ 'User-Agent': 'typical-fetch' })
         .build();
+
       await fetcher(baseUrl);
+
       expect(scope.isDone()).toEqual(true);
     });
   });
@@ -189,7 +216,9 @@ describe('typical-fetch', () => {
         .method('get')
         .parseJson((raw) => raw as { user: { name: string } })
         .build();
+
       const res = await fetcher(baseUrl);
+
       expect(res.user.name).toEqual('Rune');
       expect(scope.isDone()).toEqual(true);
     });
@@ -208,7 +237,9 @@ describe('typical-fetch', () => {
         .method('get')
         .map((e) => ({ name: 'Rune' }))
         .build();
+
       const res = await fetcher(baseUrl);
+
       expect(res.name).toEqual('Rune');
       expect(scope.isDone()).toEqual(true);
     });
@@ -224,7 +255,9 @@ describe('typical-fetch', () => {
         .parseJson((raw) => raw as { user: { name: string } })
         .map((e) => e.user.name.toUpperCase())
         .build();
+
       const res = await fetcher(baseUrl);
+
       expect(res).toEqual('RUNE');
       expect(scope.isDone()).toEqual(true);
     });
@@ -241,7 +274,9 @@ describe('typical-fetch', () => {
         .map((e) => e.user.name)
         .map((e) => e.toUpperCase())
         .build();
+
       const res = await fetcher(baseUrl);
+
       expect(res).toEqual('RUNE');
       expect(scope.isDone()).toEqual(true);
     });
@@ -261,7 +296,66 @@ describe('typical-fetch', () => {
         .method('post')
         .body('heloes!')
         .build();
+
       await fetcher(baseUrl);
+
+      expect(scope.isDone()).toEqual(true);
+    });
+
+    it('json', async () => {
+      const scope = nock(baseUrl)
+        .post('/boop', { name: 'Rune' })
+        .matchHeader('content-type', 'application/json')
+        .reply(200);
+
+      const fetcher = buildCall()
+        .path('/boop')
+        .method('post')
+        .body({ name: 'Rune' })
+        .build();
+
+      await fetcher(baseUrl);
+
+      expect(scope.isDone()).toEqual(true);
+    });
+
+    it('URLSearchParams', async () => {
+      const scope = nock(baseUrl)
+        .post('/boop', 'name=Rune')
+        .matchHeader(
+          'content-type',
+          'application/x-www-form-urlencoded;charset=UTF-8',
+        )
+        .reply(200);
+
+      const fetcher = buildCall()
+        .path('/boop')
+        .method('post')
+        .body(new URLSearchParams({ name: 'Rune' }))
+        .build();
+
+      await fetcher(baseUrl);
+
+      expect(scope.isDone()).toEqual(true);
+    });
+
+    it('FormData', async () => {
+      const scope = nock(baseUrl)
+        .post('/boop', /.*form-data.*/) // fixme: too naive
+        .matchHeader('content-type', /multipart\/form-data;.*/)
+        .reply(200);
+
+      const formData = new FormData();
+      formData.append('boop', 'snoot');
+
+      const fetcher = buildCall()
+        .path('/boop')
+        .method('post')
+        .body(formData)
+        .build();
+
+      await fetcher(baseUrl);
+
       expect(scope.isDone()).toEqual(true);
     });
   });
