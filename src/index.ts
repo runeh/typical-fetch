@@ -17,6 +17,13 @@ interface CallRecord {
   parseJson?: (arg: any) => any;
 }
 
+function mergeQueryParams(defs: QueryParam[]): URLSearchParams {
+  const pairs = defs
+    .map((e) => new URLSearchParams(e))
+    .flatMap<[string, string]>((e) => Array.from(e.entries()));
+  return new URLSearchParams(pairs);
+}
+
 function mergeHeaders(defs: HeadersInit[]): Headers {
   const headersList = defs.flatMap((e) => {
     if (Array.isArray(e)) {
@@ -125,13 +132,9 @@ class CallBuilder<Ret = void, Arg = never> {
       const path = getPath(args);
       const url = new URL(path, baseUrl);
 
-      getQuery
-        .map((e) => e(args))
-        .map((e) => new URLSearchParams(e))
-        .flatMap((e) => Array.from(e.entries()))
-        .forEach(([key, val]) => {
-          url.searchParams.append(key, val.toString());
-        });
+      mergeQueryParams(getQuery.map((e) => e(args))).forEach((val, key) => {
+        return url.searchParams.append(key, val);
+      });
 
       const headers = mergeHeaders(getHeaders.map((e) => e(args)));
 
