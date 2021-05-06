@@ -10,7 +10,6 @@ describe('typical-fetch', () => {
       const scope = nock(baseUrl).get('/boop').reply(200, 'text body');
       const fetcher = buildCall().path('/boop').method('get').build();
       const res = await fetcher(baseUrl);
-      expect(res).toBeTruthy();
       expect(scope.isDone()).toEqual(true);
     });
 
@@ -21,7 +20,6 @@ describe('typical-fetch', () => {
         .path(() => '/boop')
         .build();
       const res = await fetcher(baseUrl);
-      expect(res).toBeTruthy();
       expect(scope.isDone()).toEqual(true);
     });
 
@@ -33,7 +31,6 @@ describe('typical-fetch', () => {
         .path((e) => `/name/${e.name}`)
         .build();
       const res = await fetcher(baseUrl, { name: 'rune' });
-      expect(res).toBeTruthy();
       expect(scope.isDone()).toEqual(true);
     });
   });
@@ -47,7 +44,6 @@ describe('typical-fetch', () => {
         .query({ foo: 'bar' })
         .build();
       const res = await fetcher(baseUrl);
-      expect(res).toBeTruthy();
       expect(scope.isDone()).toEqual(true);
     });
 
@@ -62,7 +58,6 @@ describe('typical-fetch', () => {
         .query({ baz: 'phlebotinum' })
         .build();
       const res = await fetcher(baseUrl);
-      expect(res).toBeTruthy();
       expect(scope.isDone()).toEqual(true);
     });
 
@@ -78,7 +73,6 @@ describe('typical-fetch', () => {
         .query({ foo: 'second' })
         .build();
       const res = await fetcher(baseUrl);
-      expect(res).toBeTruthy();
       expect(scope.isDone()).toEqual(true);
     });
 
@@ -92,7 +86,6 @@ describe('typical-fetch', () => {
         .query(() => ({ foo: 'first' }))
         .build();
       const res = await fetcher(baseUrl);
-      expect(res).toBeTruthy();
       expect(scope.isDone()).toEqual(true);
     });
 
@@ -106,7 +99,6 @@ describe('typical-fetch', () => {
         .query(new URLSearchParams({ foo: 'first' }))
         .build();
       const res = await fetcher(baseUrl);
-      expect(res).toBeTruthy();
       expect(scope.isDone()).toEqual(true);
     });
 
@@ -121,7 +113,6 @@ describe('typical-fetch', () => {
         .query((e) => new URLSearchParams({ foo: e.value }))
         .build();
       const res = await fetcher(baseUrl, { value: 'first' });
-      expect(res).toBeTruthy();
       expect(scope.isDone()).toEqual(true);
     });
 
@@ -137,7 +128,6 @@ describe('typical-fetch', () => {
         .query({ name: 'rune' })
         .build();
       const res = await fetcher(baseUrl, { value: 'first' });
-      expect(res).toBeTruthy();
       expect(scope.isDone()).toEqual(true);
     });
   });
@@ -154,7 +144,6 @@ describe('typical-fetch', () => {
         .headers({ 'User-Agent': 'typical-fetch' })
         .build();
       const res = await fetcher(baseUrl);
-      expect(res).toBeTruthy();
       expect(scope.isDone()).toEqual(true);
     });
 
@@ -170,7 +159,6 @@ describe('typical-fetch', () => {
         .headers((ua) => ({ 'User-Agent': ua }))
         .build();
       const res = await fetcher(baseUrl, 'typical-fetch');
-      expect(res).toBeTruthy();
       expect(scope.isDone()).toEqual(true);
     });
 
@@ -187,7 +175,6 @@ describe('typical-fetch', () => {
         .headers({ 'User-Agent': 'typical-fetch' })
         .build();
       const res = await fetcher(baseUrl);
-      expect(res).toBeTruthy();
       expect(scope.isDone()).toEqual(true);
     });
   });

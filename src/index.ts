@@ -14,6 +14,7 @@ interface CallRecord {
   mapError: ((arg: any) => any)[];
   method?: HttpMethod;
   parse: (arg: any) => any;
+  parseJson?: (arg: any) => any;
 }
 
 function mergeHeaders(defs: HeadersInit[]): Headers {
@@ -109,8 +110,13 @@ class CallBuilder<Ret = void, Arg = never> {
   //   return this as any;
   // }
 
+  parseJson<T>(parser: (data: unknown) => T): CallBuilder<T, Arg> {
+    this.record.parseJson = parser;
+    return new CallBuilder<T, Arg>(this.record);
+  }
+
   build(): BuiltCall<Ret, Arg> {
-    const { getPath } = this.record;
+    const { getPath, parseJson, getQuery, getHeaders, method } = this.record;
     if (getPath == null) {
       throw new Error('no path function');
     }
@@ -119,7 +125,7 @@ class CallBuilder<Ret = void, Arg = never> {
       const path = getPath(args);
       const url = new URL(path, baseUrl);
 
-      this.record.getQuery
+      getQuery
         .map((e) => e(args))
         .map((e) => new URLSearchParams(e))
         .flatMap((e) => Array.from(e.entries()))
@@ -127,12 +133,18 @@ class CallBuilder<Ret = void, Arg = never> {
           url.searchParams.append(key, val.toString());
         });
 
-      const headers = mergeHeaders(this.record.getHeaders.map((e) => e(args)));
+      const headers = mergeHeaders(getHeaders.map((e) => e(args)));
 
-      const res = await fetch(url, { method: this.record.method, headers });
-      const text = await res.text();
+      const res = await fetch(url, { method: method, headers });
 
-      return text;
+      if (parseJson) {
+        const text = await res.text();
+        const json = JSON.parse(text);
+        const parsed = parseJson(json);
+        return parsed;
+      }
+
+      // return text;
     };
 
     return fun as any;
