@@ -9,7 +9,7 @@ describe('typical-fetch', () => {
     it('string path', async () => {
       const scope = nock(baseUrl).get('/boop').reply(200, 'text body');
       const fetcher = buildCall().path('/boop').method('get').build();
-      const res = await fetcher(baseUrl);
+      await fetcher(baseUrl);
       expect(scope.isDone()).toEqual(true);
     });
 
@@ -19,7 +19,7 @@ describe('typical-fetch', () => {
         .method('get')
         .path(() => '/boop')
         .build();
-      const res = await fetcher(baseUrl);
+      await fetcher(baseUrl);
       expect(scope.isDone()).toEqual(true);
     });
 
@@ -30,7 +30,7 @@ describe('typical-fetch', () => {
         .args<{ name: string }>()
         .path((e) => `/name/${e.name}`)
         .build();
-      const res = await fetcher(baseUrl, { name: 'rune' });
+      await fetcher(baseUrl, { name: 'rune' });
       expect(scope.isDone()).toEqual(true);
     });
   });
@@ -43,7 +43,7 @@ describe('typical-fetch', () => {
         .method('get')
         .query({ foo: 'bar' })
         .build();
-      const res = await fetcher(baseUrl);
+      await fetcher(baseUrl);
       expect(scope.isDone()).toEqual(true);
     });
 
@@ -57,7 +57,7 @@ describe('typical-fetch', () => {
         .query({ foo: 'bar' })
         .query({ baz: 'phlebotinum' })
         .build();
-      const res = await fetcher(baseUrl);
+      await fetcher(baseUrl);
       expect(scope.isDone()).toEqual(true);
     });
 
@@ -72,7 +72,7 @@ describe('typical-fetch', () => {
         .query({ foo: 'first' })
         .query({ foo: 'second' })
         .build();
-      const res = await fetcher(baseUrl);
+      await fetcher(baseUrl);
       expect(scope.isDone()).toEqual(true);
     });
 
@@ -85,7 +85,7 @@ describe('typical-fetch', () => {
         .method('get')
         .query(() => ({ foo: 'first' }))
         .build();
-      const res = await fetcher(baseUrl);
+      await fetcher(baseUrl);
       expect(scope.isDone()).toEqual(true);
     });
 
@@ -98,7 +98,7 @@ describe('typical-fetch', () => {
         .method('get')
         .query(new URLSearchParams({ foo: 'first' }))
         .build();
-      const res = await fetcher(baseUrl);
+      await fetcher(baseUrl);
       expect(scope.isDone()).toEqual(true);
     });
 
@@ -112,7 +112,7 @@ describe('typical-fetch', () => {
         .args<{ value: string }>()
         .query((e) => new URLSearchParams({ foo: e.value }))
         .build();
-      const res = await fetcher(baseUrl, { value: 'first' });
+      await fetcher(baseUrl, { value: 'first' });
       expect(scope.isDone()).toEqual(true);
     });
 
@@ -127,7 +127,7 @@ describe('typical-fetch', () => {
         .query((e) => new URLSearchParams({ foo: e.value }))
         .query({ name: 'rune' })
         .build();
-      const res = await fetcher(baseUrl, { value: 'first' });
+      await fetcher(baseUrl, { value: 'first' });
       expect(scope.isDone()).toEqual(true);
     });
   });
@@ -143,7 +143,7 @@ describe('typical-fetch', () => {
         .method('get')
         .headers({ 'User-Agent': 'typical-fetch' })
         .build();
-      const res = await fetcher(baseUrl);
+      await fetcher(baseUrl);
       expect(scope.isDone()).toEqual(true);
     });
 
@@ -158,7 +158,7 @@ describe('typical-fetch', () => {
         .args<string>()
         .headers((ua) => ({ 'User-Agent': ua }))
         .build();
-      const res = await fetcher(baseUrl, 'typical-fetch');
+      await fetcher(baseUrl, 'typical-fetch');
       expect(scope.isDone()).toEqual(true);
     });
 
@@ -174,8 +174,28 @@ describe('typical-fetch', () => {
         .method('get')
         .headers({ 'User-Agent': 'typical-fetch' })
         .build();
-      const res = await fetcher(baseUrl);
+      await fetcher(baseUrl);
       expect(scope.isDone()).toEqual(true);
     });
+  });
+
+  describe('json parsing', () => {
+    it('basic', async () => {
+      const scope = nock(baseUrl)
+        .get('/boop')
+        .reply(200, { user: { name: 'Rune' } });
+      const fetcher = buildCall()
+        .path('/boop')
+        .method('get')
+        .parseJson((raw) => {
+          return raw as { user: { name: string } };
+        })
+        .build();
+      const res = await fetcher(baseUrl);
+      expect(res.user.name).toEqual('Rune');
+      expect(scope.isDone()).toEqual(true);
+    });
+
+    it.todo('parser that gets args passed in');
   });
 });

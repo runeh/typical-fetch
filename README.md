@@ -139,3 +139,4 @@ type FethUsersCall = (args: {
 - Automatica header stuff for json/form/file bodies
 - copy record properly
 - rename `with`? Just remove it and have .method, .headers etc.
+- pass in args to parsers
