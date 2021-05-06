@@ -113,7 +113,7 @@ type FetchUsersCallError =
   | { name: 'httpError'; status: err.status }
   | { name: 'unknown error!' };
 
-type FethUsersCall = (args: {
+type FetchUsersCall = (args: {
   token: string;
   orgId: string;
   sortOrder: 'asc' | 'desc';
