@@ -362,4 +362,18 @@ describe('typical-fetch', () => {
     it.todo('stream test');
     it.todo('buffer');
   });
+
+  describe('errors during call definition', () => {
+    it('rejects multiple methods', async () => {
+      expect(() => buildCall().method('get').method('post')).toThrow();
+    });
+
+    it('rejects multiple paths', async () => {
+      expect(() => buildCall().path('foo').path('bar')).toThrow();
+    });
+
+    it('rejects multiple bodies', async () => {
+      expect(() => buildCall().body('foo').body('bar')).toThrow();
+    });
+  });
 });

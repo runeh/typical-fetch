@@ -139,8 +139,7 @@ type FetchUsersCall = (args: {
   provided one?
 - Add kitchen sink tests
 - Error handling
-- Errors if trying to call .body multiple times or similar
-- Tests for methods
+- Tests for methods?
 - Errors if trying to use body with GET etc?
 - pass in args to parsers
 - pass in args to mappers

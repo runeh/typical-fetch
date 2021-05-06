@@ -6,6 +6,7 @@ import fetch, {
   HeadersInit,
   BodyInit as OriginalBodyInit,
 } from 'node-fetch';
+import { invariant } from 'ts-invariant';
 import { JsonRoot } from './json-typings';
 
 type BodyInit =
@@ -23,10 +24,9 @@ interface CallRecord {
   getHeaders: ((arg: any) => HeadersInit)[];
   getPath?: (arg: any) => string;
   getQuery: ((arg: any) => QueryParam)[];
-  mappers: ((arg: any) => unknown)[];
   mapError: ((arg: any) => unknown)[];
+  mappers: ((arg: any) => unknown)[];
   method?: HttpMethod;
-  parse: (arg: unknown) => unknown;
   parseJson?: (arg: unknown) => unknown;
 }
 
@@ -87,7 +87,6 @@ class CallBuilder<Ret = void, Arg = never> {
       getQuery: [],
       mappers: [],
       mapError: [],
-      parse: (e) => e,
     };
   }
 
@@ -96,6 +95,7 @@ class CallBuilder<Ret = void, Arg = never> {
   }
 
   method(method: HttpMethod): CallBuilder<Ret, Arg> {
+    invariant(this.record.method == null, "Can't set method multiple times");
     this.record.method = method;
     return new CallBuilder(this.record);
   }
@@ -103,6 +103,7 @@ class CallBuilder<Ret = void, Arg = never> {
   path(path: string): this;
   path(getPath: (args: Arg) => string): this;
   path(pathOrFun: string | ((args: Arg) => string)) {
+    invariant(this.record.getPath == null, "Can't set path multiple times");
     if (typeof pathOrFun === 'function') {
       this.record.getPath = pathOrFun;
     } else {
@@ -143,6 +144,7 @@ class CallBuilder<Ret = void, Arg = never> {
   body(data: BodyType): this;
   body(fun: (args: Arg) => BodyType): this;
   body(funOrData: ((args: Arg) => BodyType) | BodyType) {
+    invariant(this.record.getBody == null, "Can't set body multiple times");
     if (typeof funOrData === 'function') {
       this.record.getBody = funOrData;
     } else {
@@ -179,13 +181,11 @@ class CallBuilder<Ret = void, Arg = never> {
       });
 
       const headers = mergeHeaders(getHeaders.map((e) => e(args)));
-
       const rawBody = getBody ? getBody(args) : undefined;
-
       const { body, contentType } = getBodyInfo(rawBody);
 
       if (contentType) {
-        // fixme: might need more headers?
+        // fixme: might need more headers for some types?
         headers.set('content-type', contentType);
       }
 
