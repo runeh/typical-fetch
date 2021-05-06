@@ -62,7 +62,7 @@ class CallBuilder<Ret = void, Arg = never> {
 
   withPath(path: string): this;
   withPath(getPath: (args: Arg) => string): this;
-  withPath(pathOrFun: any) {
+  withPath(pathOrFun: string | ((args: Arg) => string)) {
     const fun = typeof pathOrFun === 'string' ? () => pathOrFun : pathOrFun;
     this.record.getPath = fun;
     return new CallBuilder<Ret, Arg>(this.record);
@@ -70,7 +70,7 @@ class CallBuilder<Ret = void, Arg = never> {
 
   withQuery(headers: QueryParam): CallBuilder<Ret, Arg>;
   withQuery(fun: (args: Arg) => QueryParam): CallBuilder<Ret, Arg>;
-  withQuery(funOrQuery: any) {
+  withQuery(funOrQuery: QueryParam | ((args: Arg) => QueryParam)) {
     if (typeof funOrQuery === 'function') {
       this.record.getQuery.push(funOrQuery);
     } else {
@@ -81,7 +81,9 @@ class CallBuilder<Ret = void, Arg = never> {
 
   withHeaders(headers: HeadersInit): CallBuilder<Ret, Arg>;
   withHeaders(fun: (args: Arg) => HeadersInit): CallBuilder<Ret, Arg>;
-  withHeaders(funOrHeaders: any): CallBuilder<Ret, Arg> {
+  withHeaders(
+    funOrHeaders: HeadersInit | ((args: Arg) => HeadersInit),
+  ): CallBuilder<Ret, Arg> {
     if (typeof funOrHeaders === 'function') {
       this.record.getHeaders.push(funOrHeaders);
     } else {
@@ -89,12 +91,6 @@ class CallBuilder<Ret = void, Arg = never> {
     }
     return new CallBuilder<Ret, Arg>(this.record);
   }
-
-  // withQuery(headers: Record<string, string>): CallBuilder<Ret, Arg>;
-  // withQuery(fun: (args: Arg) => Record<string, string>): CallBuilder<Ret, Arg>;
-  // withQuery(a: any): CallBuilder<Ret, Arg> {
-  //   return this;
-  // }
 
   // formData / json
   // withBody(headers: Record<string, string>): CallBuilder<Ret, Arg>;
@@ -119,7 +115,7 @@ class CallBuilder<Ret = void, Arg = never> {
       throw new Error('no path function');
     }
 
-    const fun = async (baseUrl: string, args: any) => {
+    const fun = async (baseUrl: string, args: Arg) => {
       const path = getPath(args);
       const url = new URL(path, baseUrl);
 
