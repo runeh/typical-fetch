@@ -1,5 +1,5 @@
 import { Readable } from 'stream';
-import { URLSearchParams } from 'url';
+import { URL, URLSearchParams } from 'url';
 import { HeadersInit, BodyInit as OriginalBodyInit } from 'node-fetch';
 
 export type CallReturn<Ret, Err> =
@@ -10,8 +10,8 @@ export type CallReturn<Ret, Err> =
 // https://github.com/microsoft/TypeScript/issues/23182#issuecomment-379091887
 
 export type BuiltCall<Ret, Arg, Err> = [Arg] extends [never]
-  ? (baseUrl: string) => Promise<CallReturn<Ret, Err>>
-  : (baseUrl: string, args: Arg) => Promise<CallReturn<Ret, Err>>;
+  ? (baseUrl: string | URL) => Promise<CallReturn<Ret, Err>>
+  : (baseUrl: string | URL, args: Arg) => Promise<CallReturn<Ret, Err>>;
 
 export type MergedArgs<OldArg, NewArg> = [OldArg] extends [never]
   ? NewArg

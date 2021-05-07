@@ -162,5 +162,3 @@ type FetchUsersCall = (args: {
   arg.
 - Just have one arg, which has `baseUrl` ?
 - rename baseUrl to host?
-- Tests for path behviour when baseUrl includes paths
-- Support URL objects as baseurl

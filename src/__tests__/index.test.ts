@@ -50,6 +50,14 @@ describe('call builder', () => {
       await fetcher('http://www.example.org/superpath');
       expect(scope.isDone()).toEqual(true);
     });
+
+    it('merges with path from baseUrl when no leading slash and baseUrl is URL', async () => {
+      const scope = nock(baseUrl).get('/superpath/subpath').reply(200, 'OK');
+      const fetcher = buildCall().method('get').path('subpath').build();
+
+      await fetcher(new URL('http://www.example.org/superpath'));
+      expect(scope.isDone()).toEqual(true);
+    });
   });
 
   describe('query parameters', () => {
