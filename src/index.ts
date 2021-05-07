@@ -1,92 +1,16 @@
-import { Readable } from 'stream';
-import { URL, URLSearchParams } from 'url';
-import FormData from 'form-data';
-import fetch, {
-  Headers,
-  HeadersInit,
-  BodyInit as OriginalBodyInit,
-} from 'node-fetch';
+import { URL } from 'url';
+import fetch, { HeadersInit } from 'node-fetch';
 import { invariant } from 'ts-invariant';
-import { JsonRoot } from './json-typings';
-
-type CallReturn<Ret, Err> =
-  | { success: true; response: Ret; error: undefined }
-  | { success: false; response: undefined; error: Err };
-
-// The `[]` is due to this:
-// https://github.com/microsoft/TypeScript/issues/23182#issuecomment-379091887
-
-type BuiltCall<Ret, Arg, Err> = [Arg] extends [never]
-  ? (baseUrl: string) => Promise<CallReturn<Ret, Err>>
-  : (baseUrl: string, args: Arg) => Promise<CallReturn<Ret, Err>>;
-
-type MergedArgs<OldArg, NewArg> = [OldArg] extends [never]
-  ? NewArg
-  : OldArg & NewArg;
-
-type BodyInit =
-  | Exclude<OriginalBodyInit, ArrayBufferView | NodeJS.ReadableStream>
-  | Readable;
-
-type HttpMethod = 'delete' | 'get' | 'head' | 'patch' | 'post' | 'put';
-
-type QueryParam = Record<string, string> | URLSearchParams;
-
-type BodyType = JsonRoot | BodyInit;
-
-interface CallRecord {
-  getBody?: (arg: any) => BodyType;
-  getHeaders: ((arg: any) => HeadersInit)[];
-  getPath?: (arg: any) => string;
-  getQuery: ((arg: any) => QueryParam)[];
-  mapError: ((arg: any) => unknown)[];
-  mappers: ((res: any, arg: any) => unknown)[];
-  method?: HttpMethod;
-  parseJson?: (arg: unknown) => unknown;
-}
-
-function getBodyInfo(
-  data: BodyType | undefined,
-): { body?: BodyInit; contentType?: string } {
-  if (data === undefined) {
-    return {};
-  } else if (typeof data === 'string') {
-    return { body: data, contentType: 'text/plain' };
-  } else if (
-    data instanceof ArrayBuffer ||
-    data instanceof Readable ||
-    data instanceof URLSearchParams ||
-    data instanceof FormData
-  ) {
-    return { body: data };
-  } else {
-    // must be json at this point
-    // fixme: what about things that throw here? Can that happen?
-    return { body: JSON.stringify(data), contentType: 'application/json' };
-  }
-}
-
-function mergeQueryParams(defs: QueryParam[]): URLSearchParams {
-  const pairs = defs
-    .map((e) => new URLSearchParams(e))
-    .flatMap<[string, string]>((e) => Array.from(e.entries()));
-  return new URLSearchParams(pairs);
-}
-
-function mergeHeaders(defs: HeadersInit[]): Headers {
-  const headersList = defs.flatMap((e) => {
-    if (Array.isArray(e)) {
-      return e;
-    } else if (e instanceof Headers) {
-      return Array.from(e.entries());
-    } else {
-      return Object.entries(e);
-    }
-  });
-  return new Headers(headersList);
-}
-
-class TypicalError extends Error {}
+import { getBodyInfo, mergeHeaders, mergeQueryParams } from './common';
+import {
+  BodyType,
+  BuiltCall,
+  CallRecord,
+  HttpMethod,
+  MergedArgs,
+  QueryParam,
+  TypicalError,
+} from './types';
 
 class CallBuilder<Ret = void, Arg = never, Err = TypicalError> {
   record: CallRecord;
