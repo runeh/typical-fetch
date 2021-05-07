@@ -143,5 +143,5 @@ type FetchUsersCall = (args: {
 - pass in args to parsers
 - jsdoc
 - Helper that returns {url, method, body} and fetch stuff for the request ?
-- actually deal with errors
 - rename res.response
+- figure out good way of dealing with http errors / other

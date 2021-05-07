@@ -9,6 +9,7 @@ import {
   MergedArgs,
   QueryParam,
   TypicalError,
+  TypicalHttpError,
 } from './types';
 
 class CallBuilder<Ret = void, Arg = never, Err = TypicalError> {
@@ -98,28 +99,49 @@ class CallBuilder<Ret = void, Arg = never, Err = TypicalError> {
     }
 
     const fun = async (baseUrl: string, args: Arg) => {
-      const { body, headers, url } = getFetchParams(this.record, baseUrl, args);
+      try {
+        const { body, headers, url } = getFetchParams(
+          this.record,
+          baseUrl,
+          args,
+        );
 
-      const res = await fetch(url, { method, headers, body });
+        const res = await fetch(url, { method, headers, body });
+        if (!res.ok) {
+          // fixme: here goes error mappers stuff.
+          return {
+            success: false,
+            response: undefined,
+            error: new TypicalHttpError(res.status),
+          };
+        }
 
-      let data;
+        let data;
 
-      if (parseJson) {
-        const text = await res.text();
-        const json = JSON.parse(text);
-        const parsed = parseJson(json);
-        data = parsed;
-      } else {
-        // fixme: might be binary or whatevs
-        const text = await res.text();
-        data = text;
+        if (parseJson) {
+          const text = await res.text();
+          const json = JSON.parse(text);
+          const parsed = parseJson(json);
+          data = parsed;
+        } else {
+          // fixme: might be binary or whatevs
+          const text = await res.text();
+          data = text;
+        }
+
+        for (const mapper of mappers) {
+          data = mapper(data, args);
+        }
+
+        return { success: true, response: data, error: undefined };
+      } catch (error: unknown) {
+        // fixme: here goes error mappers stuff.
+        return {
+          success: false,
+          response: undefined,
+          error: new TypicalError(error),
+        };
       }
-
-      for (const mapper of mappers) {
-        data = mapper(data, args);
-      }
-
-      return { success: true, response: data, error: undefined };
     };
 
     return fun as any;

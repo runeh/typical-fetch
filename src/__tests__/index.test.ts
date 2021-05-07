@@ -525,4 +525,40 @@ describe('typical-fetch', () => {
 
     it.todo('more arg merging tests?');
   });
+
+  describe('error return values', () => {
+    it('smoke 1', async () => {
+      const scope = nock(baseUrl).get('/boop').reply(500);
+      const fetcher = buildCall().path('/boop').method('get').build();
+
+      const res = await fetcher(baseUrl);
+
+      expect(res.success).toEqual(false);
+      expect(res?.error?.name).toEqual('TypicalHttpError');
+      expect(res?.error).toMatchInlineSnapshot(
+        `[TypicalHttpError: Status: 500]`,
+      );
+      expect(scope.isDone()).toEqual(true);
+    });
+
+    it('smoke 2', async () => {
+      const scope = nock(baseUrl).get('/boop').reply(200);
+      const fetcher = buildCall()
+        .path('/boop')
+        .method('get')
+        .map(() => {
+          throw new Error('lol');
+        })
+        .build();
+
+      const res = await fetcher(baseUrl);
+
+      expect(res.success).toEqual(false);
+      expect(res?.error?.name).toEqual('TypicalError');
+      expect(res?.error).toMatchInlineSnapshot(
+        `[TypicalError: WrappedError: unknown]`,
+      );
+      expect(scope.isDone()).toEqual(true);
+    });
+  });
 });
