@@ -130,7 +130,6 @@ type FetchUsersCall = (args: {
   `['users', userId,'pages',pageNum]` turns into
   `/users/${userId}/pages/${pageNum}`
 - Make CallRecord typed?
-- adapter for runtypes/typanion etc examples
 - pass response to mappers? Wrap it in a proxy that throws if you try to
   edit/call it?
 - can parseJson just add two parsers? one for text->unknown and then the user
@@ -142,8 +141,11 @@ type FetchUsersCall = (args: {
 - support parser fun for args? As in `args(e => rt.String.check(e))`
 - pass in args to parsers
 - jsdoc
-- Helper that returns {url, method, body} and fetch stuff for the request ?
 - rename res.response
 - figure out good way of dealing with http errors / other
 - Return status somehow?
 - Helpers for isWrappedError etc?
+- Weird / fancy `error(something)` return value to not have to throw in mappers
+  etc?
+- parser for text or whatever
+- Rename the error to WrappedError?
