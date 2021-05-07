@@ -162,3 +162,4 @@ type FetchUsersCall = (args: {
   arg.
 - Just have one arg, which has `baseUrl` ?
 - rename baseUrl to host?
+- make args object readonly

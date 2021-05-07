@@ -8,6 +8,62 @@ import { buildUrl } from '../common';
 const baseUrl = 'http://www.example.org';
 
 describe('call builder', () => {
+  describe('method', () => {
+    it('get', async () => {
+      const scope = nock(baseUrl).get('/boop').reply(200, 'OK');
+      const fetcher = buildCall().path('/boop').method('get').build();
+
+      await fetcher(baseUrl);
+
+      expect(scope.isDone()).toEqual(true);
+    });
+
+    it('post', async () => {
+      const scope = nock(baseUrl).post('/boop').reply(200, 'OK');
+      const fetcher = buildCall().path('/boop').method('post').build();
+
+      await fetcher(baseUrl);
+
+      expect(scope.isDone()).toEqual(true);
+    });
+
+    it('head', async () => {
+      const scope = nock(baseUrl).head('/boop').reply(200, 'OK');
+      const fetcher = buildCall().path('/boop').method('head').build();
+
+      await fetcher(baseUrl);
+
+      expect(scope.isDone()).toEqual(true);
+    });
+
+    it('put', async () => {
+      const scope = nock(baseUrl).put('/boop').reply(200, 'OK');
+      const fetcher = buildCall().path('/boop').method('put').build();
+
+      await fetcher(baseUrl);
+
+      expect(scope.isDone()).toEqual(true);
+    });
+
+    it('delete', async () => {
+      const scope = nock(baseUrl).delete('/boop').reply(200, 'OK');
+      const fetcher = buildCall().path('/boop').method('delete').build();
+
+      await fetcher(baseUrl);
+
+      expect(scope.isDone()).toEqual(true);
+    });
+
+    it('patch', async () => {
+      const scope = nock(baseUrl).patch('/boop').reply(200, 'OK');
+      const fetcher = buildCall().path('/boop').method('patch').build();
+
+      await fetcher(baseUrl);
+
+      expect(scope.isDone()).toEqual(true);
+    });
+  });
+
   describe('path', () => {
     it('string path', async () => {
       const scope = nock(baseUrl).get('/boop').reply(200, 'OK');
