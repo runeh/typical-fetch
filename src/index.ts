@@ -1,6 +1,6 @@
 import fetch, { HeadersInit } from 'node-fetch';
 import { invariant } from 'ts-invariant';
-import { getFetchParams } from './common';
+import { applyErrorMappers, getFetchParams } from './common';
 import {
   BodyType,
   BuiltCall,
@@ -12,11 +12,16 @@ import {
   TypicalHttpError,
 } from './types';
 
-class CallBuilder<Ret = void, Arg = never, Err = TypicalError> {
+class CallBuilder<
+  Ret = void,
+  Arg = never,
+  Err = TypicalError | TypicalHttpError
+> {
   record: CallRecord;
 
   constructor(record?: CallRecord) {
     this.record = record ?? {
+      errorMappers: [],
       getHeaders: [],
       getQuery: [],
       mappers: [],
@@ -76,6 +81,13 @@ class CallBuilder<Ret = void, Arg = never, Err = TypicalError> {
     });
   }
 
+  mapError<T>(mapper: (error: Err, args: Arg) => T): CallBuilder<T, Arg, T> {
+    return new CallBuilder<T, Arg, T>({
+      ...this.record,
+      errorMappers: [...this.record.errorMappers, mapper],
+    });
+  }
+
   body(data: BodyType): this;
   body(fun: (args: Arg) => BodyType): this;
   body(funOrData: ((args: Arg) => BodyType) | BodyType) {
@@ -90,7 +102,14 @@ class CallBuilder<Ret = void, Arg = never, Err = TypicalError> {
   }
 
   build(): BuiltCall<Ret, Arg, Err> {
-    const { getBody, getPath, mappers, method, parseJson } = this.record;
+    const {
+      getBody,
+      getPath,
+      mappers,
+      method,
+      errorMappers,
+      parseJson,
+    } = this.record;
 
     invariant(getPath != null, 'No path set');
     invariant(method != null, 'No method set');
@@ -112,7 +131,11 @@ class CallBuilder<Ret = void, Arg = never, Err = TypicalError> {
           return {
             success: false,
             response: undefined,
-            error: new TypicalHttpError(res.status),
+            error: applyErrorMappers(
+              new TypicalHttpError(res.status),
+              errorMappers,
+              args,
+            ),
           };
         }
 
@@ -139,7 +162,7 @@ class CallBuilder<Ret = void, Arg = never, Err = TypicalError> {
         return {
           success: false,
           response: undefined,
-          error: new TypicalError(error),
+          error: applyErrorMappers(new TypicalError(error), errorMappers, args),
         };
       }
     };

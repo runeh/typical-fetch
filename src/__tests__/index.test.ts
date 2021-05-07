@@ -560,5 +560,24 @@ describe('typical-fetch', () => {
       );
       expect(scope.isDone()).toEqual(true);
     });
+
+    it('error mapper 1', async () => {
+      const scope = nock(baseUrl).get('/boop').reply(500);
+      const fetcher = buildCall()
+        .path('/boop')
+        .method('get')
+        .mapError((_err) => 'arrar!')
+        .build();
+
+      const res = await fetcher(baseUrl);
+
+      expect(res.success).toEqual(false);
+      expect(res?.error).toEqual('arrar!');
+      expect(res?.error).toMatchInlineSnapshot(`"arrar!"`);
+      expect(scope.isDone()).toEqual(true);
+    });
+
+    it.todo('runtype failure');
+    it.todo('malformed json failure');
   });
 });

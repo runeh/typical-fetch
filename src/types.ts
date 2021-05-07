@@ -34,6 +34,7 @@ export interface CallRecord {
   getQuery: ((arg: any) => QueryParam)[];
   mapError: ((arg: any) => unknown)[];
   mappers: ((res: any, arg: any) => unknown)[];
+  errorMappers: ((error: any, arg: any) => unknown)[];
   method?: HttpMethod;
   parseJson?: (arg: unknown) => unknown;
 }

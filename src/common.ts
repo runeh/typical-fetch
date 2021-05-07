@@ -72,3 +72,15 @@ export function getFetchParams(
 
   return { url, headers, body };
 }
+
+export function applyErrorMappers(
+  error: any,
+  mappers: CallRecord['errorMappers'],
+  args: any,
+) {
+  let newError = error;
+  for (const mapper of mappers) {
+    newError = mapper(error, args);
+  }
+  return newError;
+}
