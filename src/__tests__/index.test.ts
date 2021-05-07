@@ -449,4 +449,33 @@ describe('typical-fetch', () => {
       expect(() => buildCall().build()).toThrow();
     });
   });
+
+  describe('chaining', () => {
+    it('copies thing', async () => {
+      const getScope = nock(baseUrl).get('/boop').reply(200);
+      const postScope = nock(baseUrl).post('/boop').reply(200);
+
+      const rootFetcher = buildCall()
+        .path('/boop')
+        .map(() => 1);
+
+      const get = rootFetcher
+        .method('get')
+        .map((n) => n + 3)
+        .build();
+
+      const post = rootFetcher
+        .method('post')
+        .map((n) => n + 1)
+        .build();
+
+      const getResult = await get(baseUrl);
+      const postResult = await post(baseUrl);
+
+      expect(getResult).toEqual(4);
+      expect(postResult).toEqual(2);
+      expect(getScope.isDone()).toEqual(true);
+      expect(postScope.isDone()).toEqual(true);
+    });
+  });
 });

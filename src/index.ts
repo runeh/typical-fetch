@@ -79,7 +79,7 @@ type BuiltCall<Ret, Arg> = [Arg] extends [never]
   : (baseUrl: string, args: Arg) => Promise<Ret>;
 
 class CallBuilder<Ret = void, Arg = never> {
-  private record: CallRecord;
+  record: CallRecord;
 
   constructor(record?: CallRecord) {
     this.record = record ?? {
@@ -96,31 +96,29 @@ class CallBuilder<Ret = void, Arg = never> {
 
   method(method: HttpMethod): CallBuilder<Ret, Arg> {
     invariant(this.record.method == null, "Can't set method multiple times");
-    this.record.method = method;
-    return new CallBuilder(this.record);
+    return new CallBuilder({ ...this.record, method });
   }
 
   path(path: string): this;
   path(getPath: (args: Arg) => string): this;
   path(pathOrFun: string | ((args: Arg) => string)) {
     invariant(this.record.getPath == null, "Can't set path multiple times");
-    if (typeof pathOrFun === 'function') {
-      this.record.getPath = pathOrFun;
-    } else {
-      this.record.getPath = () => pathOrFun;
-    }
-    return new CallBuilder<Ret, Arg>(this.record);
+    const getPath =
+      typeof pathOrFun === 'function' ? pathOrFun : () => pathOrFun;
+
+    return new CallBuilder<Ret, Arg>({ ...this.record, getPath });
   }
 
   query(headers: QueryParam): CallBuilder<Ret, Arg>;
   query(fun: (args: Arg) => QueryParam): CallBuilder<Ret, Arg>;
   query(funOrQuery: QueryParam | ((args: Arg) => QueryParam)) {
-    if (typeof funOrQuery === 'function') {
-      this.record.getQuery.push(funOrQuery);
-    } else {
-      this.record.getQuery.push(() => funOrQuery);
-    }
-    return new CallBuilder<Ret, Arg>(this.record);
+    const getQueryFun =
+      typeof funOrQuery === 'function' ? funOrQuery : () => funOrQuery;
+
+    return new CallBuilder<Ret, Arg>({
+      ...this.record,
+      getQuery: [...this.record.getQuery, getQueryFun],
+    });
   }
 
   headers(headers: HeadersInit): CallBuilder<Ret, Arg>;
@@ -128,34 +126,33 @@ class CallBuilder<Ret = void, Arg = never> {
   headers(
     funOrHeaders: HeadersInit | ((args: Arg) => HeadersInit),
   ): CallBuilder<Ret, Arg> {
-    if (typeof funOrHeaders === 'function') {
-      this.record.getHeaders.push(funOrHeaders);
-    } else {
-      this.record.getHeaders.push(() => funOrHeaders);
-    }
-    return new CallBuilder<Ret, Arg>(this.record);
+    const getHeadersFun =
+      typeof funOrHeaders === 'function' ? funOrHeaders : () => funOrHeaders;
+
+    return new CallBuilder<Ret, Arg>({
+      ...this.record,
+      getHeaders: [...this.record.getHeaders, getHeadersFun],
+    });
   }
 
   map<T>(mapper: (data: Ret, args: Arg) => T): CallBuilder<T, Arg> {
-    this.record.mappers.push(mapper);
-    return new CallBuilder<T, Arg>(this.record);
+    return new CallBuilder<T, Arg>({
+      ...this.record,
+      mappers: [...this.record.mappers, mapper],
+    });
   }
 
   body(data: BodyType): this;
   body(fun: (args: Arg) => BodyType): this;
   body(funOrData: ((args: Arg) => BodyType) | BodyType) {
     invariant(this.record.getBody == null, "Can't set body multiple times");
-    if (typeof funOrData === 'function') {
-      this.record.getBody = funOrData;
-    } else {
-      this.record.getBody = () => funOrData;
-    }
-    return new CallBuilder<Ret, Arg>(this.record);
+    const getBody =
+      typeof funOrData === 'function' ? funOrData : () => funOrData;
+    return new CallBuilder<Ret, Arg>({ ...this.record, getBody });
   }
 
   parseJson<T>(parser: (data: unknown) => T): CallBuilder<T, Arg> {
-    this.record.parseJson = parser;
-    return new CallBuilder<T, Arg>(this.record);
+    return new CallBuilder<T, Arg>({ ...this.record, parseJson: parser });
   }
 
   build(): BuiltCall<Ret, Arg> {
