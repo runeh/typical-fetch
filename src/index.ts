@@ -170,8 +170,10 @@ class CallBuilder<Ret = void, Arg = never> {
       parseJson,
     } = this.record;
 
-    if (getPath == null) {
-      throw new Error('no path function');
+    invariant(getPath != null, 'No path set');
+    invariant(method != null, 'No method set');
+    if (getBody && ['head', 'get', 'delete'].includes(method)) {
+      throw new Error(`Can't include body in "${method}" request`);
     }
 
     const fun = async (baseUrl: string, args: Arg) => {

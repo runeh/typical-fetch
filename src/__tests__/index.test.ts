@@ -448,6 +448,24 @@ describe('typical-fetch', () => {
     it('rejects when missing path', async () => {
       expect(() => buildCall().build()).toThrow();
     });
+
+    it('rejects when missing method', async () => {
+      expect(() => buildCall().path('/').build()).toThrow();
+    });
+
+    it('rejects when using body with bodyless method', async () => {
+      expect(() =>
+        buildCall().path('/').method('head').body('test').build(),
+      ).toThrow();
+
+      expect(() =>
+        buildCall().path('/').method('get').body('test').build(),
+      ).toThrow();
+
+      expect(() =>
+        buildCall().path('/').method('delete').body('test').build(),
+      ).toThrow();
+    });
   });
 
   describe('chaining', () => {
