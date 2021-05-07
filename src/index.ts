@@ -1,7 +1,6 @@
-import { URL } from 'url';
 import fetch, { HeadersInit } from 'node-fetch';
 import { invariant } from 'ts-invariant';
-import { getBodyInfo, mergeHeaders, mergeQueryParams } from './common';
+import { getFetchParams } from './common';
 import {
   BodyType,
   BuiltCall,
@@ -90,15 +89,7 @@ class CallBuilder<Ret = void, Arg = never, Err = TypicalError> {
   }
 
   build(): BuiltCall<Ret, Arg, Err> {
-    const {
-      getBody,
-      getHeaders,
-      getPath,
-      getQuery,
-      mappers,
-      method,
-      parseJson,
-    } = this.record;
+    const { getBody, getPath, mappers, method, parseJson } = this.record;
 
     invariant(getPath != null, 'No path set');
     invariant(method != null, 'No method set');
@@ -107,21 +98,7 @@ class CallBuilder<Ret = void, Arg = never, Err = TypicalError> {
     }
 
     const fun = async (baseUrl: string, args: Arg) => {
-      const path = getPath(args);
-      const url = new URL(path, baseUrl);
-
-      mergeQueryParams(getQuery.map((e) => e(args))).forEach((val, key) => {
-        return url.searchParams.append(key, val);
-      });
-
-      const headers = mergeHeaders(getHeaders.map((e) => e(args)));
-      const rawBody = getBody ? getBody(args) : undefined;
-      const { body, contentType } = getBodyInfo(rawBody);
-
-      if (contentType) {
-        // fixme: might need more headers for some types?
-        headers.set('content-type', contentType);
-      }
+      const { body, headers, url } = getFetchParams(this.record, baseUrl, args);
 
       const res = await fetch(url, { method, headers, body });
 

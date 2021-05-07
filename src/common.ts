@@ -1,8 +1,9 @@
 import { Readable } from 'stream';
-import { URLSearchParams } from 'url';
+import { URL, URLSearchParams } from 'url';
 import FormData from 'form-data';
 import { BodyInit, Headers, HeadersInit } from 'node-fetch';
-import { BodyType, QueryParam } from './types';
+import invariant from 'ts-invariant';
+import { BodyType, CallRecord, QueryParam } from './types';
 
 export function getBodyInfo(
   data: BodyType | undefined,
@@ -43,4 +44,31 @@ export function mergeHeaders(defs: HeadersInit[]): Headers {
     }
   });
   return new Headers(headersList);
+}
+
+export function getFetchParams(
+  record: CallRecord,
+  baseUrl: string,
+  args: any,
+): { url: URL; headers: Headers; body: BodyInit | undefined } {
+  const { getHeaders, getBody, getPath, getQuery } = record;
+  invariant(getPath != null, 'No path set');
+
+  const path = getPath(args);
+  const url = new URL(path, baseUrl);
+
+  mergeQueryParams(getQuery.map((e) => e(args))).forEach((val, key) => {
+    return url.searchParams.append(key, val);
+  });
+
+  const headers = mergeHeaders(getHeaders.map((e) => e(args)));
+  const rawBody = getBody ? getBody(args) : undefined;
+  const { body, contentType } = getBodyInfo(rawBody);
+
+  if (contentType) {
+    // fixme: might need more headers for some types?
+    headers.set('content-type', contentType);
+  }
+
+  return { url, headers, body };
 }
