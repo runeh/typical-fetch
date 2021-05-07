@@ -135,20 +135,16 @@ type FetchUsersCall = (args: {
 - can parseJson just add two parsers? one for text->unknown and then the user
   provided one?
 - Add kitchen sink tests
-- Error handling
-- Tests for methods?
 - follow redirects?
 - support parser fun for args? As in `args(e => rt.String.check(e))`
 - pass in args to parsers
 - jsdoc
-- rename res.response
 - figure out good way of dealing with http errors / other
 - Return status somehow?
 - Helpers for isWrappedError etc?
 - Weird / fancy `error(something)` return value to not have to throw in mappers
   etc?
 - parser for text or whatever
-- Rename the error to WrappedError?
 - Default return should be void
 - error if both parse and parseBody
 - have a parseRaw thingy that passes response object?

@@ -8,7 +8,7 @@ import {
   HttpMethod,
   MergedArgs,
   QueryParam,
-  TypicalError,
+  TypicalWrappedError,
   TypicalHttpError,
 } from './types';
 
@@ -17,7 +17,7 @@ export { unwrapError } from './common';
 class CallBuilder<
   Ret = void,
   Arg = never,
-  Err = TypicalError | TypicalHttpError
+  Err = TypicalWrappedError | TypicalHttpError
 > {
   record: CallRecord;
 
@@ -171,7 +171,11 @@ class CallBuilder<
         return {
           success: false,
           body: undefined,
-          error: applyErrorMappers(new TypicalError(error), errorMappers, args),
+          error: applyErrorMappers(
+            new TypicalWrappedError(error),
+            errorMappers,
+            args,
+          ),
         };
       }
     };

@@ -39,7 +39,7 @@ export interface CallRecord {
   parseJson?: (arg: unknown) => unknown;
 }
 
-export class TypicalError extends Error {
+export class TypicalWrappedError extends Error {
   name = 'TypicalError';
   constructor(public wrappedError: unknown, message?: string) {
     super(`WrappedError: ${message ?? 'unknown'}`);
