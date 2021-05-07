@@ -1,15 +1,16 @@
-import { URLSearchParams } from 'url';
+import { URL, URLSearchParams } from 'url';
 import FormData from 'form-data';
 import nock from 'nock';
 import { Headers } from 'node-fetch';
 import { buildCall } from '../index';
+import { buildUrl } from '../common';
 
 const baseUrl = 'http://www.example.org';
 
-describe('typical-fetch', () => {
-  describe('string path', () => {
+describe('call builder', () => {
+  describe('path', () => {
     it('string path', async () => {
-      const scope = nock(baseUrl).get('/boop').reply(200, 'text body');
+      const scope = nock(baseUrl).get('/boop').reply(200, 'OK');
       const fetcher = buildCall().path('/boop').method('get').build();
 
       await fetcher(baseUrl);
@@ -18,7 +19,7 @@ describe('typical-fetch', () => {
     });
 
     it('callback path no args', async () => {
-      const scope = nock(baseUrl).get('/boop').reply(200, 'text body');
+      const scope = nock(baseUrl).get('/boop').reply(200, 'OK');
       const fetcher = buildCall()
         .method('get')
         .path(() => '/boop')
@@ -30,7 +31,7 @@ describe('typical-fetch', () => {
     });
 
     it('callback path with args', async () => {
-      const scope = nock(baseUrl).get('/name/rune').reply(200, 'text body');
+      const scope = nock(baseUrl).get('/name/rune').reply(200, 'OK');
       const fetcher = buildCall()
         .method('get')
         .args<{ name: string }>()
@@ -41,11 +42,19 @@ describe('typical-fetch', () => {
 
       expect(scope.isDone()).toEqual(true);
     });
+
+    it('merges with path from baseUrl when no leading slash', async () => {
+      const scope = nock(baseUrl).get('/superpath/subpath').reply(200, 'OK');
+      const fetcher = buildCall().method('get').path('subpath').build();
+
+      await fetcher('http://www.example.org/superpath');
+      expect(scope.isDone()).toEqual(true);
+    });
   });
 
   describe('query parameters', () => {
     it('object', async () => {
-      const scope = nock(baseUrl).get('/boop?foo=bar').reply(200, 'text body');
+      const scope = nock(baseUrl).get('/boop?foo=bar').reply(200, 'OK');
       const fetcher = buildCall()
         .path('/boop')
         .method('get')
@@ -60,7 +69,7 @@ describe('typical-fetch', () => {
     it('multiple objects', async () => {
       const scope = nock(baseUrl)
         .get('/boop?foo=bar&baz=phlebotinum')
-        .reply(200, 'text body');
+        .reply(200, 'OK');
       const fetcher = buildCall()
         .path('/boop')
         .method('get')
@@ -77,7 +86,7 @@ describe('typical-fetch', () => {
     it('multiple objects, uses both', async () => {
       const scope = nock(baseUrl)
         .get('/boop?foo=first&foo=second')
-        .reply(200, 'text body');
+        .reply(200, 'OK');
       const fetcher = buildCall()
         .path('/boop')
         .method('get')
@@ -91,9 +100,7 @@ describe('typical-fetch', () => {
     });
 
     it('callback returning object', async () => {
-      const scope = nock(baseUrl)
-        .get('/boop?foo=first')
-        .reply(200, 'text body');
+      const scope = nock(baseUrl).get('/boop?foo=first').reply(200, 'OK');
       const fetcher = buildCall()
         .path('/boop')
         .method('get')
@@ -106,9 +113,7 @@ describe('typical-fetch', () => {
     });
 
     it('urlsearchparams as value', async () => {
-      const scope = nock(baseUrl)
-        .get('/boop?foo=first')
-        .reply(200, 'text body');
+      const scope = nock(baseUrl).get('/boop?foo=first').reply(200, 'OK');
       const fetcher = buildCall()
         .path('/boop')
         .method('get')
@@ -121,9 +126,7 @@ describe('typical-fetch', () => {
     });
 
     it('urlsearchparams as callback', async () => {
-      const scope = nock(baseUrl)
-        .get('/boop?foo=first')
-        .reply(200, 'text body');
+      const scope = nock(baseUrl).get('/boop?foo=first').reply(200, 'OK');
       const fetcher = buildCall()
         .path('/boop')
         .method('get')
@@ -139,7 +142,7 @@ describe('typical-fetch', () => {
     it('mixed object and params', async () => {
       const scope = nock(baseUrl)
         .get('/boop?foo=first&name=rune')
-        .reply(200, 'text body');
+        .reply(200, 'OK');
       const fetcher = buildCall()
         .path('/boop')
         .method('get')
@@ -158,7 +161,7 @@ describe('typical-fetch', () => {
     it('object', async () => {
       const scope = nock(baseUrl)
         .get('/boop')
-        .reply(200, 'text body')
+        .reply(200, 'OK')
         .matchHeader('User-Agent', 'typical-fetch');
       const fetcher = buildCall()
         .path('/boop')
@@ -174,7 +177,7 @@ describe('typical-fetch', () => {
     it('array', async () => {
       const scope = nock(baseUrl)
         .get('/boop')
-        .reply(200, 'text body')
+        .reply(200, 'OK')
         .matchHeader('User-Agent', 'typical-fetch');
       const fetcher = buildCall()
         .path('/boop')
@@ -190,7 +193,7 @@ describe('typical-fetch', () => {
     it('Header', async () => {
       const scope = nock(baseUrl)
         .get('/boop')
-        .reply(200, 'text body')
+        .reply(200, 'OK')
         .matchHeader('User-Agent', 'typical-fetch');
       const fetcher = buildCall()
         .path('/boop')
@@ -206,7 +209,7 @@ describe('typical-fetch', () => {
     it('callback', async () => {
       const scope = nock(baseUrl)
         .get('/boop')
-        .reply(200, 'text body')
+        .reply(200, 'OK')
         .matchHeader('User-Agent', 'typical-fetch');
       const fetcher = buildCall()
         .path('/boop')
@@ -223,7 +226,7 @@ describe('typical-fetch', () => {
     it('multiple objects', async () => {
       const scope = nock(baseUrl)
         .get('/boop')
-        .reply(200, 'text body')
+        .reply(200, 'OK')
         .matchHeader('User-Agent', 'typical-fetch')
         .matchHeader('token', 'abcd');
       const fetcher = buildCall()
@@ -579,5 +582,45 @@ describe('typical-fetch', () => {
 
     it.todo('runtype failure');
     it.todo('malformed json failure');
+  });
+});
+
+describe('buildUrl', () => {
+  it('smoke test', () => {
+    expect(buildUrl('http://foo.com', '').href).toEqual('http://foo.com/');
+
+    expect(buildUrl('http://foo.com/', '/').href).toEqual('http://foo.com/');
+
+    expect(buildUrl('http://foo.com', 'bar').href).toEqual(
+      'http://foo.com/bar',
+    );
+
+    expect(buildUrl('http://foo.com/', 'bar').href).toEqual(
+      'http://foo.com/bar',
+    );
+
+    expect(buildUrl('http://foo.com/', '/bar').href).toEqual(
+      'http://foo.com/bar',
+    );
+
+    expect(buildUrl('http://foo.com', '/bar').href).toEqual(
+      'http://foo.com/bar',
+    );
+
+    expect(buildUrl('http://foo.com/bar/', 'baz').href).toEqual(
+      'http://foo.com/bar/baz',
+    );
+
+    expect(buildUrl('http://foo.com/bar', 'baz').href).toEqual(
+      'http://foo.com/bar/baz',
+    );
+
+    expect(buildUrl('http://foo.com/bar/', '/baz').href).toEqual(
+      'http://foo.com/bar/baz',
+    );
+
+    expect(buildUrl('http://foo.com/bar', '/baz/').href).toEqual(
+      'http://foo.com/bar/baz',
+    );
   });
 });

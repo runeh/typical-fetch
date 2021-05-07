@@ -46,6 +46,16 @@ export function mergeHeaders(defs: HeadersInit[]): Headers {
   return new Headers(headersList);
 }
 
+export function buildUrl(baseUrl: string | URL, path: string): URL {
+  const base = new URL('', baseUrl);
+  const fullPath = [base.pathname, path]
+    .flatMap((e) => e.split('/'))
+    .filter((e) => e !== '')
+    .join('/');
+
+  return new URL(fullPath, base.origin);
+}
+
 export function getFetchParams(
   record: CallRecord,
   baseUrl: string,
@@ -55,7 +65,8 @@ export function getFetchParams(
   invariant(getPath != null, 'No path set');
 
   const path = getPath(args);
-  const url = new URL(path, baseUrl);
+
+  const url = buildUrl(baseUrl, path);
 
   mergeQueryParams(getQuery.map((e) => e(args))).forEach((val, key) => {
     return url.searchParams.append(key, val);
