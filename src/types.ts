@@ -3,8 +3,8 @@ import { URLSearchParams } from 'url';
 import { HeadersInit, BodyInit as OriginalBodyInit } from 'node-fetch';
 
 export type CallReturn<Ret, Err> =
-  | { success: true; response: Ret; error: undefined }
-  | { success: false; response: undefined; error: Err };
+  | { success: true; body: Ret; error: undefined }
+  | { success: false; body: undefined; error: Err };
 
 // The `[]` is due to this:
 // https://github.com/microsoft/TypeScript/issues/23182#issuecomment-379091887

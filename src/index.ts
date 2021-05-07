@@ -129,10 +129,9 @@ class CallBuilder<
 
         const res = await fetch(url, { method, headers, body });
         if (!res.ok) {
-          // fixme: here goes error mappers stuff.
           return {
             success: false,
-            response: undefined,
+            body: undefined,
             error: applyErrorMappers(
               new TypicalHttpError(res.status),
               errorMappers,
@@ -158,12 +157,12 @@ class CallBuilder<
           data = mapper(data, args);
         }
 
-        return { success: true, response: data, error: undefined };
+        return { success: true, body: data, error: undefined };
       } catch (error: unknown) {
         // fixme: here goes error mappers stuff.
         return {
           success: false,
-          response: undefined,
+          body: undefined,
           error: applyErrorMappers(new TypicalError(error), errorMappers, args),
         };
       }

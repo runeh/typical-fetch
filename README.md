@@ -149,3 +149,4 @@ type FetchUsersCall = (args: {
   etc?
 - parser for text or whatever
 - Rename the error to WrappedError?
+- Default return should be void

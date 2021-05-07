@@ -52,7 +52,7 @@ async function parseWithTypanion() {
   const res = await getRequest(baseUrl);
 
   if (res.success) {
-    console.log(res.response.json);
+    console.log(res.body.json);
   } else {
     console.log(res.error.name);
   }

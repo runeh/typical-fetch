@@ -29,7 +29,7 @@ async function getRequest() {
   const res = await getRequest(baseUrl);
 
   if (res.success) {
-    console.log(res.response);
+    console.log(res.body);
   } else {
     console.log(res.error.name);
   }
@@ -49,7 +49,7 @@ async function jsonRequest() {
   const res = await getRequest(baseUrl);
 
   if (res.success) {
-    console.log(res.response.slideshow);
+    console.log(res.body.slideshow);
   } else {
     console.log(res.error.name);
   }
@@ -70,7 +70,7 @@ async function jsonRequestWithMapper() {
   const res = await getRequest(baseUrl);
 
   if (res.success) {
-    console.log(res.response);
+    console.log(res.body);
   } else {
     console.log(res.error.name);
   }
@@ -92,7 +92,7 @@ async function jsonRequestWithMultipleMappers() {
   const res = await getRequest(baseUrl);
 
   if (res.success) {
-    console.log(res.response);
+    console.log(res.body);
   } else {
     console.log(res.error.name);
   }
