@@ -150,3 +150,6 @@ type FetchUsersCall = (args: {
 - parser for text or whatever
 - Rename the error to WrappedError?
 - Default return should be void
+- error if both parse and parseBody
+- have a parseRaw thingy that passes response object?
+- Add response object to the result?
