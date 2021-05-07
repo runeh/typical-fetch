@@ -131,8 +131,6 @@ type FetchUsersCall = (args: {
   `/users/${userId}/pages/${pageNum}`
 - Make CallRecord typed?
 - adapter for runtypes/typanion etc examples
-- copy record properly
-- multiple .args calls allowed?
 - pass response to mappers? Wrap it in a proxy that throws if you try to
   edit/call it?
 - can parseJson just add two parsers? one for text->unknown and then the user
@@ -144,3 +142,6 @@ type FetchUsersCall = (args: {
 - follow redirects?
 - support parser fun for args?
 - pass in args to parsers
+- jsdoc
+
+- - multiple .args calls allowed?

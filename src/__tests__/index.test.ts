@@ -477,5 +477,34 @@ describe('typical-fetch', () => {
       expect(getScope.isDone()).toEqual(true);
       expect(postScope.isDone()).toEqual(true);
     });
+
+    it.todo('more chaining tests');
+  });
+
+  describe('arg merging', () => {
+    it('smoke', async () => {
+      const scope = nock(baseUrl)
+        .get('/boop?sortOrder=desc')
+        .matchHeader('authorization', 'tokan')
+        .reply(200);
+
+      const formData = new FormData();
+      formData.append('boop', 'snoot');
+
+      const fetcher = buildCall()
+        .args<{ token: string }>()
+        .headers((args) => ({ authorization: args.token }))
+        .path('/boop')
+        .method('get')
+        .args<{ sortOrder: 'asc' | 'desc' }>()
+        .query((e) => ({ sortOrder: e.sortOrder }))
+        .build();
+
+      await fetcher(baseUrl, { token: 'tokan', sortOrder: 'desc' });
+
+      expect(scope.isDone()).toEqual(true);
+    });
+
+    it.todo('more arg merging tests?');
   });
 });

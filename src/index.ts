@@ -78,6 +78,10 @@ type BuiltCall<Ret, Arg> = [Arg] extends [never]
   ? (baseUrl: string) => Promise<Ret>
   : (baseUrl: string, args: Arg) => Promise<Ret>;
 
+type MergedArgs<OldArg, NewArg> = [OldArg] extends [never]
+  ? NewArg
+  : OldArg & NewArg;
+
 class CallBuilder<Ret = void, Arg = never> {
   record: CallRecord;
 
@@ -90,7 +94,7 @@ class CallBuilder<Ret = void, Arg = never> {
     };
   }
 
-  args<T>(): CallBuilder<Ret, T> {
+  args<T>(): CallBuilder<Ret, MergedArgs<Arg, T>> {
     return new CallBuilder(this.record);
   }
 
