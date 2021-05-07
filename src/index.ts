@@ -31,10 +31,18 @@ class CallBuilder<
     };
   }
 
+  /**
+   * Add a type for the argument to the built call by passing it as a generic,
+   * such as `builder.args<{name: string}>()`. Can be called multiple times,
+   * the resulting type will be the intersecton of all the arguments.
+   */
   args<T>(): CallBuilder<Ret, MergedArgs<Arg, T>, Err> {
     return new CallBuilder(this.record);
   }
 
+  /**
+   * Set the HTTP method of the request being defined.
+   */
   method(method: HttpMethod): CallBuilder<Ret, Arg, Err> {
     invariant(this.record.method == null, "Can't set method multiple times");
     return new CallBuilder({ ...this.record, method });

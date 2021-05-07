@@ -153,3 +153,13 @@ type FetchUsersCall = (args: {
 - error if both parse and parseBody
 - have a parseRaw thingy that passes response object?
 - Add response object to the result?
+- test for file uploads
+- interceptor / event handlers?
+- clean up where error handling happens
+- test for throwing in weird places
+- test for throwing in json parsing
+- support passing in baseUrl when building? Or a `host()`. If present, skip the
+  arg.
+- Just have one arg, which has `baseUrl` ?
+- rename baseUrl to host?
+- Tests for path behviour when baseUrl includes paths

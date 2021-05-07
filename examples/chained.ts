@@ -16,6 +16,8 @@ const accountInfoRt = rt.Record({
   avatar: rt.String.optional(),
 });
 
+type AccountInfo = rt.Static<typeof accountInfoRt>;
+
 export function makeApiCalls() {
   const baseBuilder = buildCall()
     .args<{ apiToken: string }>()
@@ -28,27 +30,37 @@ export function makeApiCalls() {
       return error instanceof rt.ValidationError ? error : originalError;
     });
 
+  const createAccountInfo = baseBuilder
+    .args<Omit<AccountInfo, 'id'>>()
+    .method('put')
+    .path('/user')
+    .parseJson(withRuntype(accountInfoRt))
+    .build();
+
   const getAccountInfo = baseBuilder
-    .args<{ accountId: string }>()
+    .args<{ id: string }>()
     .method('get')
-    .path((e) => `/user/${e.accountId}`)
-    .parseJson(withRuntype(accountInfoRt));
+    .path((e) => `/user/${e.id}`)
+    .parseJson(withRuntype(accountInfoRt))
+    .build();
 
   const updateAccountInfo = baseBuilder
-    .args<{ account: rt.Static<typeof accountInfoRt> }>()
+    .args<{ account: { id: string } & Partial<AccountInfo> }>()
     .method('post')
     .path((e) => `/user/${e.account.id}`)
-    .parseJson(withRuntype(accountInfoRt));
+    .parseJson(withRuntype(accountInfoRt))
+    .build();
 
   const deleteAccountInfo = baseBuilder
-    .args<{ accountId: string }>()
+    .args<{ id: string }>()
     .method('delete')
-    .path((e) => `/user/${e.accountId}`);
+    .path((e) => `/user/${e.id}`)
+    .build();
 
   const setAvatar = baseBuilder
-    .args<{ accountId: string; avatarFilePath: string }>()
+    .args<{ id: string; avatarFilePath: string }>()
     .method('post')
-    .path((e) => `/user/${e.accountId}/avatar`)
+    .path((e) => `/user/${e.id}/avatar`)
     .headers((e) => {
       const mimeType = getType(e.avatarFilePath);
       if (mimeType) {
@@ -60,12 +72,14 @@ export function makeApiCalls() {
     .body((e) => {
       const stream = createReadStream(e.avatarFilePath);
       return stream;
-    });
+    })
+    .build();
 
   return {
     getAccountInfo,
     updateAccountInfo,
     deleteAccountInfo,
+    createAccountInfo,
     setAvatar,
   };
 }
