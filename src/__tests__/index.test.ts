@@ -323,6 +323,26 @@ describe('call builder', () => {
       expect(scope.isDone()).toEqual(true);
     });
 
+    it('expected error if parser throws', async () => {
+      const scope = nock(baseUrl)
+        .get('/boop')
+        .reply(200, { user: { name: 'Rune' } });
+      const fetcher = buildCall()
+        .path('/boop')
+        .method('get')
+        .parseJson(() => {
+          throw new Error('whoops');
+          return 'asdf';
+        })
+        .build();
+
+      const res = await fetcher(baseUrl);
+
+      expect(res.success).toEqual(false);
+      expect(res.error).toMatchInlineSnapshot(`[TypicalWrappedError: unknown]`);
+      expect(scope.isDone()).toEqual(true);
+    });
+
     it.todo('parser that gets args passed in');
   });
 
@@ -621,9 +641,9 @@ describe('call builder', () => {
       const res = await fetcher(baseUrl);
 
       expect(res.success).toEqual(false);
-      expect(res?.error?.name).toEqual('TypicalError');
+      expect(res?.error?.name).toEqual('TypicalWrappedError');
       expect(res?.error).toMatchInlineSnapshot(
-        `[TypicalError: WrappedError: unknown]`,
+        `[TypicalWrappedError: unknown]`,
       );
       expect(scope.isDone()).toEqual(true);
     });
@@ -686,5 +706,18 @@ describe('buildUrl', () => {
     expect(buildUrl('http://foo.com/bar', '/baz/').href).toEqual(
       'http://foo.com/bar/baz',
     );
+  });
+
+  describe('misc', () => {
+    it('actually returns void when no parser', async () => {
+      const scope = nock(baseUrl).get('/boop').reply(200, 'OK');
+      const fetcher = buildCall().path('/boop').method('get').build();
+
+      const res = await fetcher(baseUrl);
+      expect(res.success).toEqual(true);
+      expect(res.body).toBeUndefined();
+
+      expect(scope.isDone()).toEqual(true);
+    });
   });
 });

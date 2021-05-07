@@ -145,7 +145,6 @@ type FetchUsersCall = (args: {
 - Weird / fancy `error(something)` return value to not have to throw in mappers
   etc?
 - parser for text or whatever
-- Default return should be void
 - error if both parse and parseBody
 - have a parseRaw thingy that passes response object?
 - Add response object to the result?

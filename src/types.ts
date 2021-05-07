@@ -40,9 +40,9 @@ export interface CallRecord {
 }
 
 export class TypicalWrappedError extends Error {
-  name = 'TypicalError';
+  name = 'TypicalWrappedError';
   constructor(public wrappedError: unknown, message?: string) {
-    super(`WrappedError: ${message ?? 'unknown'}`);
+    super(`${message ?? 'unknown'}`);
   }
 }
 

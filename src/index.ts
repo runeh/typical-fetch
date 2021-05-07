@@ -8,8 +8,8 @@ import {
   HttpMethod,
   MergedArgs,
   QueryParam,
-  TypicalWrappedError,
   TypicalHttpError,
+  TypicalWrappedError,
 } from './types';
 
 export { unwrapError } from './common';
@@ -156,9 +156,9 @@ class CallBuilder<
           const parsed = parseJson(json);
           data = parsed;
         } else {
-          // fixme: might be binary or whatevs
-          const text = await res.text();
-          data = text;
+          // fixme: might be binary or text or whatevs
+          // const text = await res.text();
+          data = undefined;
         }
 
         for (const mapper of mappers) {
