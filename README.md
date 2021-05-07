@@ -152,9 +152,9 @@ type FetchUsersCall = (args: {
 - interceptor / event handlers?
 - clean up where error handling happens
 - test for throwing in weird places
-- test for throwing in json parsing
 - support passing in baseUrl when building? Or a `host()`. If present, skip the
   arg.
 - Just have one arg, which has `baseUrl` ?
 - rename baseUrl to host?
 - make args object readonly
+- Have more custom errors? like at least JSON parsing at least?

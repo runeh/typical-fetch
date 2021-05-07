@@ -3,7 +3,8 @@ import FormData from 'form-data';
 import nock from 'nock';
 import { Headers } from 'node-fetch';
 import { buildCall } from '../index';
-import { buildUrl } from '../common';
+import { buildUrl, unwrapError } from '../common';
+import invariant from 'ts-invariant';
 
 const baseUrl = 'http://www.example.org';
 
@@ -340,6 +341,29 @@ describe('call builder', () => {
 
       expect(res.success).toEqual(false);
       expect(res.error).toMatchInlineSnapshot(`[TypicalWrappedError: unknown]`);
+      expect(scope.isDone()).toEqual(true);
+    });
+
+    it('expected error if malformed response', async () => {
+      const scope = nock(baseUrl)
+        .get('/boop')
+        .reply(200, '{ malformed: "missing close brace ->" ');
+      const fetcher = buildCall()
+        .path('/boop')
+        .method('get')
+        .parseJson((e) => {
+          return e as { malformed: string };
+        })
+        .build();
+
+      const res = await fetcher(baseUrl);
+
+      expect(res.success).toEqual(false);
+      invariant(res.success === false);
+      const err = unwrapError(res.error);
+      expect(err).toMatchInlineSnapshot(
+        `[SyntaxError: Unexpected token m in JSON at position 2]`,
+      );
       expect(scope.isDone()).toEqual(true);
     });
 
