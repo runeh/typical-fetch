@@ -8,7 +8,8 @@
   "scripts": {
     "lint": "eslint ./src --ext .ts,.tsx",
     "test": "jest --coverage src/**/*",
-    "build": "tsc"
+    "build": "tsc",
+    "run-examples": "ts-node-script examples/basics.ts"
   },
   "devDependencies": {
     "@types/jest": "~26.0.22",
@@ -26,12 +27,15 @@
     "lint-staged": "^10.5.4",
     "nock": "^13.0.11",
     "prettier": "^2.2.1",
+    "runtypes": "^6.3.0",
     "ts-jest": "~26.5.5",
     "ts-node": "^9.1.1",
     "ts-node-dev": "^1.1.6",
+    "typanion": "^3.3.1",
     "typedoc": "^0.20.35",
     "typedoc-plugin-markdown": "^3.7.1",
-    "typescript": "^4.2.4"
+    "typescript": "^4.2.4",
+    "zod": "^1.11.17"
   },
   "dependencies": {
     "form-data": "^4.0.0",

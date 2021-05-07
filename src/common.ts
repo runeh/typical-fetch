@@ -3,7 +3,7 @@ import { URL, URLSearchParams } from 'url';
 import FormData from 'form-data';
 import { BodyInit, Headers, HeadersInit } from 'node-fetch';
 import invariant from 'ts-invariant';
-import { BodyType, CallRecord, QueryParam } from './types';
+import { BodyType, CallRecord, QueryParam, TypicalError } from './types';
 
 export function getBodyInfo(
   data: BodyType | undefined,
@@ -83,4 +83,8 @@ export function applyErrorMappers(
     newError = mapper(error, args);
   }
   return newError;
+}
+
+export function unwrapError(err: unknown) {
+  return err instanceof TypicalError ? err.wrappedError : undefined;
 }

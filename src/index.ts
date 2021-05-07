@@ -12,6 +12,8 @@ import {
   TypicalHttpError,
 } from './types';
 
+export { unwrapError } from './common';
+
 class CallBuilder<
   Ret = void,
   Arg = never,
@@ -81,8 +83,8 @@ class CallBuilder<
     });
   }
 
-  mapError<T>(mapper: (error: Err, args: Arg) => T): CallBuilder<T, Arg, T> {
-    return new CallBuilder<T, Arg, T>({
+  mapError<T>(mapper: (error: Err, args: Arg) => T): CallBuilder<Ret, Arg, T> {
+    return new CallBuilder<Ret, Arg, T>({
       ...this.record,
       errorMappers: [...this.record.errorMappers, mapper],
     });

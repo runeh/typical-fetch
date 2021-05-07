@@ -139,9 +139,11 @@ type FetchUsersCall = (args: {
 - Error handling
 - Tests for methods?
 - follow redirects?
-- support parser fun for args?
+- support parser fun for args? As in `args(e => rt.String.check(e))`
 - pass in args to parsers
 - jsdoc
 - Helper that returns {url, method, body} and fetch stuff for the request ?
 - rename res.response
 - figure out good way of dealing with http errors / other
+- Return status somehow?
+- Helpers for isWrappedError etc?
