@@ -125,25 +125,21 @@ type FetchUsersCall = (args: {
 
 ### todo
 
-- Narrow after calling `method` and `path`?
-- Support array as return value from `path`? As in
-  `['users', userId,'pages',pageNum]` turns into
-  `/users/${userId}/pages/${pageNum}`
-- Make CallRecord typed?
-- pass response to mappers? Wrap it in a proxy that throws if you try to
-  edit/call it?
+- Just have one arg, which has `baseUrl` ?
+- make args object readonly
+- pass response to mappers?
+- Wrap response in a proxy that throws if you try to edit/call it?
 - can parseJson just add two parsers? one for text->unknown and then the user
   provided one?
 - Add kitchen sink tests
 - follow redirects?
+- test for redirect stuff
 - support parser fun for args? As in `args(e => rt.String.check(e))`
 - pass in args to parsers
 - jsdoc
 - figure out good way of dealing with http errors / other
 - Return status somehow?
 - Helpers for isWrappedError etc?
-- Weird / fancy `error(something)` return value to not have to throw in mappers
-  etc?
 - parser for text or whatever
 - error if both parse and parseBody
 - have a parseRaw thingy that passes response object?
@@ -154,7 +150,14 @@ type FetchUsersCall = (args: {
 - test for throwing in weird places
 - support passing in baseUrl when building? Or a `host()`. If present, skip the
   arg.
-- Just have one arg, which has `baseUrl` ?
-- rename baseUrl to host?
-- make args object readonly
 - Have more custom errors? like at least JSON parsing at least?
+
+#### maybe
+
+- Narrow after calling `method` and `path`?
+- Support array as return value from `path`? As in
+  `['users', userId,'pages',pageNum]` turns into
+  `/users/${userId}/pages/${pageNum}`
+- Make CallRecord typed?
+- Weird / fancy `error(something)` return value to not have to throw in mappers
+  etc?
