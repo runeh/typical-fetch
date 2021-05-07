@@ -252,7 +252,7 @@ describe('typical-fetch', () => {
 
       const res = await fetcher(baseUrl);
 
-      expect(res.user.name).toEqual('Rune');
+      expect(res.response?.user.name).toEqual('Rune');
       expect(scope.isDone()).toEqual(true);
     });
 
@@ -273,7 +273,8 @@ describe('typical-fetch', () => {
 
       const res = await fetcher(baseUrl);
 
-      expect(res.name).toEqual('Rune');
+      expect(res.success).toEqual(true);
+      expect(res.response?.name).toEqual('Rune');
       expect(scope.isDone()).toEqual(true);
     });
 
@@ -290,8 +291,7 @@ describe('typical-fetch', () => {
         .build();
 
       const res = await fetcher(baseUrl);
-
-      expect(res).toEqual('RUNE');
+      expect(res.response).toEqual('RUNE');
       expect(scope.isDone()).toEqual(true);
     });
 
@@ -310,7 +310,7 @@ describe('typical-fetch', () => {
 
       const res = await fetcher(baseUrl, { name: 'foo' });
 
-      expect(res).toEqual('RUNEfoo');
+      expect(res.response).toEqual('RUNEfoo');
       expect(scope.isDone()).toEqual(true);
     });
 
@@ -329,7 +329,7 @@ describe('typical-fetch', () => {
 
       const res = await fetcher(baseUrl);
 
-      expect(res).toEqual('RUNE');
+      expect(res.response).toEqual('RUNE');
       expect(scope.isDone()).toEqual(true);
     });
 
@@ -490,8 +490,8 @@ describe('typical-fetch', () => {
       const getResult = await get(baseUrl);
       const postResult = await post(baseUrl);
 
-      expect(getResult).toEqual(4);
-      expect(postResult).toEqual(2);
+      expect(getResult.response).toEqual(4);
+      expect(postResult.response).toEqual(2);
       expect(getScope.isDone()).toEqual(true);
       expect(postScope.isDone()).toEqual(true);
     });
