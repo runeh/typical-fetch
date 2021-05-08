@@ -201,11 +201,3 @@ class CallBuilder<
 export function buildCall(): CallBuilder {
   return new CallBuilder();
 }
-
-// type Lal<T> = T extends { baseUrl: string } & Record<string, any>
-//   ? Omit<T, 'baseUrl'>
-//   : T;
-
-// type x = { name: string; foo: number, baseUrl: string };
-
-// type Lol = Lal<x>;

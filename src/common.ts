@@ -96,6 +96,6 @@ export function applyErrorMappers(
   return newError;
 }
 
-export function unwrapError(err: unknown) {
+export function unwrapError(err: unknown): unknown {
   return err instanceof TypicalWrappedError ? err.wrappedError : undefined;
 }
