@@ -26,7 +26,7 @@ export interface HttpBinJsonSlide {
 async function getRequest() {
   const getRequest = buildCall().path('/get').method('get').build();
 
-  const res = await getRequest(baseUrl);
+  const res = await getRequest({ baseUrl });
 
   if (res.success) {
     console.log(res.body);
@@ -46,7 +46,7 @@ async function jsonRequest() {
     .parseJson((data) => data as HttpBinJsonRoot)
     .build();
 
-  const res = await getRequest(baseUrl);
+  const res = await getRequest({ baseUrl });
 
   if (res.success) {
     console.log(res.body.slideshow);
@@ -67,7 +67,7 @@ async function jsonRequestWithMapper() {
     .map((e) => e.slideshow.title.toUpperCase())
     .build();
 
-  const res = await getRequest(baseUrl);
+  const res = await getRequest({ baseUrl });
 
   if (res.success) {
     console.log(res.body);
@@ -89,7 +89,7 @@ async function jsonRequestWithMultipleMappers() {
     .map((e) => e.toUpperCase())
     .build();
 
-  const res = await getRequest(baseUrl);
+  const res = await getRequest({ baseUrl });
 
   if (res.success) {
     console.log(res.body);

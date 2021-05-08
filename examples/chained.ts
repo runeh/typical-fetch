@@ -18,8 +18,9 @@ const accountInfoRt = rt.Record({
 
 type AccountInfo = rt.Static<typeof accountInfoRt>;
 
-export function makeApiCalls() {
+export function makeClient(baseUrl: URL) {
   const baseBuilder = buildCall()
+    .baseUrl(baseUrl)
     .args<{ apiToken: string }>()
     .headers((args) => [
       ['user-agent', 'typical-fetch'],
