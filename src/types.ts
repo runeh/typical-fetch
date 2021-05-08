@@ -22,8 +22,8 @@ export type BuiltCall<Ret, Arg, Err> = [Arg] extends [never]
   : (args: Arg) => Promise<CallReturn<Ret, Err>>;
 
 export type MergedArgs<OldArg, NewArg> = [OldArg] extends [never]
-  ? NewArg
-  : OldArg & NewArg;
+  ? Readonly<NewArg>
+  : Readonly<OldArg & NewArg>;
 
 export type BodyInit =
   | Exclude<OriginalBodyInit, ArrayBufferView | NodeJS.ReadableStream>

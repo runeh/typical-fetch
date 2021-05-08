@@ -126,7 +126,6 @@ type FetchUsersCall = (args: {
 ### todo
 
 - Just have one arg, which has `baseUrl` ?
-- make args object readonly
 - parser for text or whatever
 - error if both parse and parseBody
 - pass response to mappers?
@@ -151,6 +150,7 @@ type FetchUsersCall = (args: {
 - support passing in baseUrl when building? Or a `host()`. If present, skip the
   arg.
 - Have more custom errors? like at least JSON parsing at least?
+- should path default to `/` ?
 
 #### maybe
 
