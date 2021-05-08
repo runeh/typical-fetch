@@ -14,7 +14,7 @@ describe('call builder', () => {
       const scope = nock(baseUrl).get('/boop').reply(200, 'OK');
       const fetcher = buildCall().path('/boop').method('get').build();
 
-      await fetcher(baseUrl);
+      await fetcher({ baseUrl });
 
       expect(scope.isDone()).toEqual(true);
     });
@@ -23,7 +23,7 @@ describe('call builder', () => {
       const scope = nock(baseUrl).post('/boop').reply(200, 'OK');
       const fetcher = buildCall().path('/boop').method('post').build();
 
-      await fetcher(baseUrl);
+      await fetcher({ baseUrl });
 
       expect(scope.isDone()).toEqual(true);
     });
@@ -32,7 +32,7 @@ describe('call builder', () => {
       const scope = nock(baseUrl).head('/boop').reply(200, 'OK');
       const fetcher = buildCall().path('/boop').method('head').build();
 
-      await fetcher(baseUrl);
+      await fetcher({ baseUrl });
 
       expect(scope.isDone()).toEqual(true);
     });
@@ -41,7 +41,7 @@ describe('call builder', () => {
       const scope = nock(baseUrl).put('/boop').reply(200, 'OK');
       const fetcher = buildCall().path('/boop').method('put').build();
 
-      await fetcher(baseUrl);
+      await fetcher({ baseUrl });
 
       expect(scope.isDone()).toEqual(true);
     });
@@ -50,7 +50,7 @@ describe('call builder', () => {
       const scope = nock(baseUrl).delete('/boop').reply(200, 'OK');
       const fetcher = buildCall().path('/boop').method('delete').build();
 
-      await fetcher(baseUrl);
+      await fetcher({ baseUrl });
 
       expect(scope.isDone()).toEqual(true);
     });
@@ -59,7 +59,7 @@ describe('call builder', () => {
       const scope = nock(baseUrl).patch('/boop').reply(200, 'OK');
       const fetcher = buildCall().path('/boop').method('patch').build();
 
-      await fetcher(baseUrl);
+      await fetcher({ baseUrl });
 
       expect(scope.isDone()).toEqual(true);
     });
@@ -70,7 +70,7 @@ describe('call builder', () => {
       const scope = nock(baseUrl).get('/boop').reply(200, 'OK');
       const fetcher = buildCall().path('/boop').method('get').build();
 
-      await fetcher(baseUrl);
+      await fetcher({ baseUrl });
 
       expect(scope.isDone()).toEqual(true);
     });
@@ -82,7 +82,7 @@ describe('call builder', () => {
         .path(() => '/boop')
         .build();
 
-      await fetcher(baseUrl);
+      await fetcher({ baseUrl });
 
       expect(scope.isDone()).toEqual(true);
     });
@@ -95,7 +95,7 @@ describe('call builder', () => {
         .path((e) => `/name/${e.name}`)
         .build();
 
-      await fetcher(baseUrl, { name: 'rune' });
+      await fetcher({ baseUrl, name: 'rune' });
 
       expect(scope.isDone()).toEqual(true);
     });
@@ -104,7 +104,7 @@ describe('call builder', () => {
       const scope = nock(baseUrl).get('/superpath/subpath').reply(200, 'OK');
       const fetcher = buildCall().method('get').path('subpath').build();
 
-      await fetcher('http://www.example.org/superpath');
+      await fetcher({ baseUrl: 'http://www.example.org/superpath' });
       expect(scope.isDone()).toEqual(true);
     });
 
@@ -112,7 +112,7 @@ describe('call builder', () => {
       const scope = nock(baseUrl).get('/superpath/subpath').reply(200, 'OK');
       const fetcher = buildCall().method('get').path('subpath').build();
 
-      await fetcher(new URL('http://www.example.org/superpath'));
+      await fetcher({ baseUrl: new URL('http://www.example.org/superpath') });
       expect(scope.isDone()).toEqual(true);
     });
   });
@@ -126,7 +126,7 @@ describe('call builder', () => {
         .query({ foo: 'bar' })
         .build();
 
-      await fetcher(baseUrl);
+      await fetcher({ baseUrl });
 
       expect(scope.isDone()).toEqual(true);
     });
@@ -142,7 +142,7 @@ describe('call builder', () => {
         .query({ baz: 'phlebotinum' })
         .build();
 
-      await fetcher(baseUrl);
+      await fetcher({ baseUrl });
 
       expect(scope.isDone()).toEqual(true);
     });
@@ -159,7 +159,7 @@ describe('call builder', () => {
         .query({ foo: 'second' })
         .build();
 
-      await fetcher(baseUrl);
+      await fetcher({ baseUrl });
 
       expect(scope.isDone()).toEqual(true);
     });
@@ -172,7 +172,7 @@ describe('call builder', () => {
         .query(() => ({ foo: 'first' }))
         .build();
 
-      await fetcher(baseUrl);
+      await fetcher({ baseUrl });
 
       expect(scope.isDone()).toEqual(true);
     });
@@ -185,7 +185,7 @@ describe('call builder', () => {
         .query(new URLSearchParams({ foo: 'first' }))
         .build();
 
-      await fetcher(baseUrl);
+      await fetcher({ baseUrl });
 
       expect(scope.isDone()).toEqual(true);
     });
@@ -199,7 +199,7 @@ describe('call builder', () => {
         .query((e) => new URLSearchParams({ foo: e.value }))
         .build();
 
-      await fetcher(baseUrl, { value: 'first' });
+      await fetcher({ baseUrl, value: 'first' });
 
       expect(scope.isDone()).toEqual(true);
     });
@@ -216,7 +216,7 @@ describe('call builder', () => {
         .query({ name: 'rune' })
         .build();
 
-      await fetcher(baseUrl, { value: 'first' });
+      await fetcher({ baseUrl, value: 'first' });
 
       expect(scope.isDone()).toEqual(true);
     });
@@ -234,7 +234,7 @@ describe('call builder', () => {
         .headers({ 'User-Agent': 'typical-fetch' })
         .build();
 
-      await fetcher(baseUrl);
+      await fetcher({ baseUrl });
 
       expect(scope.isDone()).toEqual(true);
     });
@@ -250,7 +250,7 @@ describe('call builder', () => {
         .headers([['User-Agent', 'typical-fetch']])
         .build();
 
-      await fetcher(baseUrl);
+      await fetcher({ baseUrl });
 
       expect(scope.isDone()).toEqual(true);
     });
@@ -266,7 +266,7 @@ describe('call builder', () => {
         .headers(new Headers({ 'User-Agent': 'typical-fetch' }))
         .build();
 
-      await fetcher(baseUrl);
+      await fetcher({ baseUrl });
 
       expect(scope.isDone()).toEqual(true);
     });
@@ -279,11 +279,11 @@ describe('call builder', () => {
       const fetcher = buildCall()
         .path('/boop')
         .method('get')
-        .args<string>()
-        .headers((ua) => ({ 'User-Agent': ua }))
+        .args<{ ua: string }>()
+        .headers(({ ua }) => ({ 'User-Agent': ua }))
         .build();
 
-      await fetcher(baseUrl, 'typical-fetch');
+      await fetcher({ baseUrl, ua: 'typical-fetch' });
 
       expect(scope.isDone()).toEqual(true);
     });
@@ -301,7 +301,7 @@ describe('call builder', () => {
         .headers({ 'User-Agent': 'typical-fetch' })
         .build();
 
-      await fetcher(baseUrl);
+      await fetcher({ baseUrl });
 
       expect(scope.isDone()).toEqual(true);
     });
@@ -318,7 +318,7 @@ describe('call builder', () => {
         .parseJson((raw) => raw as { user: { name: string } })
         .build();
 
-      const res = await fetcher(baseUrl);
+      const res = await fetcher({ baseUrl });
 
       expect(res.body?.user.name).toEqual('Rune');
       expect(scope.isDone()).toEqual(true);
@@ -337,7 +337,7 @@ describe('call builder', () => {
         })
         .build();
 
-      const res = await fetcher(baseUrl);
+      const res = await fetcher({ baseUrl });
 
       expect(res.success).toEqual(false);
       expect(res.error).toMatchInlineSnapshot(`[TypicalWrappedError: unknown]`);
@@ -356,7 +356,7 @@ describe('call builder', () => {
         })
         .build();
 
-      const res = await fetcher(baseUrl);
+      const res = await fetcher({ baseUrl });
 
       expect(res.success).toEqual(false);
       invariant(res.success === false);
@@ -382,7 +382,7 @@ describe('call builder', () => {
         .map((e) => ({ name: 'Rune' }))
         .build();
 
-      const res = await fetcher(baseUrl);
+      const res = await fetcher({ baseUrl });
 
       expect(res.success).toEqual(true);
       expect(res.body?.name).toEqual('Rune');
@@ -401,7 +401,7 @@ describe('call builder', () => {
         .map((e) => e.user.name.toUpperCase())
         .build();
 
-      const res = await fetcher(baseUrl);
+      const res = await fetcher({ baseUrl });
       expect(res.body).toEqual('RUNE');
       expect(scope.isDone()).toEqual(true);
     });
@@ -419,7 +419,7 @@ describe('call builder', () => {
         .map((data, args) => data.user.name.toUpperCase() + args.name)
         .build();
 
-      const res = await fetcher(baseUrl, { name: 'foo' });
+      const res = await fetcher({ baseUrl, name: 'foo' });
 
       expect(res.body).toEqual('RUNEfoo');
       expect(scope.isDone()).toEqual(true);
@@ -438,7 +438,7 @@ describe('call builder', () => {
         .map((e) => e.toUpperCase())
         .build();
 
-      const res = await fetcher(baseUrl);
+      const res = await fetcher({ baseUrl });
 
       expect(res.body).toEqual('RUNE');
       expect(scope.isDone()).toEqual(true);
@@ -460,7 +460,7 @@ describe('call builder', () => {
         .body('heloes!')
         .build();
 
-      await fetcher(baseUrl);
+      await fetcher({ baseUrl });
 
       expect(scope.isDone()).toEqual(true);
     });
@@ -477,7 +477,7 @@ describe('call builder', () => {
         .body(() => 'heloes!')
         .build();
 
-      await fetcher(baseUrl);
+      await fetcher({ baseUrl });
 
       expect(scope.isDone()).toEqual(true);
     });
@@ -494,7 +494,7 @@ describe('call builder', () => {
         .body({ name: 'Rune' })
         .build();
 
-      await fetcher(baseUrl);
+      await fetcher({ baseUrl });
 
       expect(scope.isDone()).toEqual(true);
     });
@@ -514,7 +514,7 @@ describe('call builder', () => {
         .body(new URLSearchParams({ name: 'Rune' }))
         .build();
 
-      await fetcher(baseUrl);
+      await fetcher({ baseUrl });
 
       expect(scope.isDone()).toEqual(true);
     });
@@ -534,7 +534,7 @@ describe('call builder', () => {
         .body(formData)
         .build();
 
-      await fetcher(baseUrl);
+      await fetcher({ baseUrl });
 
       expect(scope.isDone()).toEqual(true);
     });
@@ -598,8 +598,8 @@ describe('call builder', () => {
         .map((n) => n + 1)
         .build();
 
-      const getResult = await get(baseUrl);
-      const postResult = await post(baseUrl);
+      const getResult = await get({ baseUrl });
+      const postResult = await post({ baseUrl });
 
       expect(getResult.body).toEqual(4);
       expect(postResult.body).toEqual(2);
@@ -629,7 +629,7 @@ describe('call builder', () => {
         .query((e) => ({ sortOrder: e.sortOrder }))
         .build();
 
-      await fetcher(baseUrl, { token: 'tokan', sortOrder: 'desc' });
+      await fetcher({ baseUrl, token: 'tokan', sortOrder: 'desc' });
 
       expect(scope.isDone()).toEqual(true);
     });
@@ -642,7 +642,7 @@ describe('call builder', () => {
       const scope = nock(baseUrl).get('/boop').reply(500);
       const fetcher = buildCall().path('/boop').method('get').build();
 
-      const res = await fetcher(baseUrl);
+      const res = await fetcher({ baseUrl });
 
       expect(res.success).toEqual(false);
       expect(res?.error?.name).toEqual('TypicalHttpError');
@@ -662,7 +662,7 @@ describe('call builder', () => {
         })
         .build();
 
-      const res = await fetcher(baseUrl);
+      const res = await fetcher({ baseUrl });
 
       expect(res.success).toEqual(false);
       expect(res?.error?.name).toEqual('TypicalWrappedError');
@@ -680,7 +680,7 @@ describe('call builder', () => {
         .mapError((_err) => 'arrar!')
         .build();
 
-      const res = await fetcher(baseUrl);
+      const res = await fetcher({ baseUrl });
 
       expect(res.success).toEqual(false);
       expect(res?.error).toEqual('arrar!');
@@ -737,7 +737,7 @@ describe('buildUrl', () => {
       const scope = nock(baseUrl).get('/boop').reply(200, 'OK');
       const fetcher = buildCall().path('/boop').method('get').build();
 
-      const res = await fetcher(baseUrl);
+      const res = await fetcher({ baseUrl });
       expect(res.success).toEqual(true);
       expect(res.body).toBeUndefined();
 

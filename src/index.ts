@@ -1,3 +1,4 @@
+import { URL } from 'url';
 import fetch, { HeadersInit } from 'node-fetch';
 import { invariant } from 'ts-invariant';
 import { applyErrorMappers, getFetchParams } from './common';
@@ -16,7 +17,10 @@ export { unwrapError } from './common';
 
 class CallBuilder<
   Ret = void,
-  Arg = never,
+  Arg extends Record<string, unknown> & { baseUrl: string | URL } = Record<
+    string,
+    unknown
+  > & { baseUrl: string | URL },
   Err = TypicalWrappedError | TypicalHttpError
 > {
   record: CallRecord;
@@ -36,7 +40,11 @@ class CallBuilder<
    * such as `builder.args<{name: string}>()`. Can be called multiple times,
    * the resulting type will be the intersecton of all the arguments.
    */
-  args<T>(): CallBuilder<Ret, MergedArgs<Arg, T>, Err> {
+  args<T extends Record<string, unknown>>(): CallBuilder<
+    Ret,
+    MergedArgs<Arg, T>,
+    Err
+  > {
     return new CallBuilder(this.record);
   }
 
@@ -127,11 +135,11 @@ class CallBuilder<
       throw new Error(`Can't include body in "${method}" request`);
     }
 
-    const fun = async (baseUrl: string, args: Arg) => {
+    const fun = async (args: Arg) => {
       try {
         const { body, headers, url } = getFetchParams(
           this.record,
-          baseUrl,
+          args.baseUrl as any, // fixme
           args,
         );
 
@@ -187,3 +195,11 @@ class CallBuilder<
 export function buildCall(): CallBuilder {
   return new CallBuilder();
 }
+
+// type Lal<T> = T extends { baseUrl: string } & Record<string, any>
+//   ? Omit<T, 'baseUrl'>
+//   : T;
+
+// type x = { name: string; foo: number, baseUrl: string };
+
+// type Lol = Lal<x>;

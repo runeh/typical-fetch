@@ -127,6 +127,8 @@ type FetchUsersCall = (args: {
 
 - Just have one arg, which has `baseUrl` ?
 - make args object readonly
+- parser for text or whatever
+- error if both parse and parseBody
 - pass response to mappers?
 - Wrap response in a proxy that throws if you try to edit/call it?
 - can parseJson just add two parsers? one for text->unknown and then the user
@@ -140,8 +142,6 @@ type FetchUsersCall = (args: {
 - figure out good way of dealing with http errors / other
 - Return status somehow?
 - Helpers for isWrappedError etc?
-- parser for text or whatever
-- error if both parse and parseBody
 - have a parseRaw thingy that passes response object?
 - Add response object to the result?
 - test for file uploads
