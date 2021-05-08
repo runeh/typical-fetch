@@ -17,10 +17,7 @@ export { unwrapError } from './common';
 
 class CallBuilder<
   Ret = void,
-  Arg extends Record<string, unknown> & { baseUrl: string | URL } = Record<
-    string,
-    unknown
-  > & { baseUrl: string | URL },
+  Arg extends Record<string, any> = { baseUrl: string | URL },
   Err = TypicalWrappedError | TypicalHttpError
 > {
   record: CallRecord;
@@ -54,6 +51,14 @@ class CallBuilder<
   method(method: HttpMethod): CallBuilder<Ret, Arg, Err> {
     invariant(this.record.method == null, "Can't set method multiple times");
     return new CallBuilder({ ...this.record, method });
+  }
+
+  baseUrl(url: string | URL): CallBuilder<Ret, Omit<Arg, 'baseUrl'>, Err> {
+    const baseUrl = new URL('', url);
+    return new CallBuilder<Ret, Omit<Arg, 'baseUrl'>, Err>({
+      ...this.record,
+      baseUrl,
+    });
   }
 
   path(path: string): this;
@@ -136,10 +141,11 @@ class CallBuilder<
     }
 
     const fun = async (args: Arg) => {
+      const baseUrl = this.record.baseUrl ?? args.baseUrl;
       try {
         const { body, headers, url } = getFetchParams(
           this.record,
-          args.baseUrl as any, // fixme
+          baseUrl,
           args,
         );
 

@@ -58,7 +58,7 @@ export function buildUrl(baseUrl: string | URL, path: string): URL {
 
 export function getFetchParams(
   record: CallRecord,
-  baseUrl: string,
+  baseUrl: string | URL,
   args: any,
 ): { url: URL; headers: Headers; body: BodyInit | undefined } {
   const { getHeaders, getBody, getPath, getQuery } = record;

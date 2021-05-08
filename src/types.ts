@@ -1,5 +1,5 @@
 import { Readable } from 'stream';
-import { URLSearchParams } from 'url';
+import { URL, URLSearchParams } from 'url';
 import { HeadersInit, BodyInit as OriginalBodyInit } from 'node-fetch';
 
 export type CallReturn<Ret, Err> =
@@ -9,7 +9,15 @@ export type CallReturn<Ret, Err> =
 // The `[]` is due to this:
 // https://github.com/microsoft/TypeScript/issues/23182#issuecomment-379091887
 
+/**
+ * The shape of the function returned by `.build()`. This conditional type
+ * makes sure that the function takes no arguments if `Arg` is `never` or an
+ * empty object, `Record<string, never>`.
+ * Otherwise, the function takes Arg as a single argument
+ */
 export type BuiltCall<Ret, Arg, Err> = [Arg] extends [never]
+  ? () => Promise<CallReturn<Ret, Err>>
+  : Arg extends Record<string, never>
   ? () => Promise<CallReturn<Ret, Err>>
   : (args: Arg) => Promise<CallReturn<Ret, Err>>;
 
@@ -37,6 +45,7 @@ export interface CallRecord {
   errorMappers: ((error: any, arg: any) => unknown)[];
   method?: HttpMethod;
   parseJson?: (arg: unknown) => unknown;
+  baseUrl?: URL;
 }
 
 export class TypicalWrappedError extends Error {

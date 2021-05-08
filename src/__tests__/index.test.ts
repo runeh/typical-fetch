@@ -732,6 +732,39 @@ describe('buildUrl', () => {
     );
   });
 
+  describe('baseUrl in builder', () => {
+    it('Works when no other args', async () => {
+      const scope = nock(baseUrl).get('/boop').reply(200, 'OK');
+      const fetcher = buildCall()
+        .baseUrl(baseUrl)
+        .path('/boop')
+        .method('get')
+        .build();
+
+      const res = await fetcher();
+      expect(res.success).toEqual(true);
+      expect(res.body).toBeUndefined();
+
+      expect(scope.isDone()).toEqual(true);
+    });
+
+    it('Works when other args', async () => {
+      const scope = nock(baseUrl).get('/boop/1').reply(200, 'OK');
+      const fetcher = buildCall()
+        .baseUrl(baseUrl)
+        .args<{ id: number }>()
+        .path((e) => `/boop/${e.id}`)
+        .method('get')
+        .build();
+
+      const res = await fetcher({ id: 1 });
+      expect(res.success).toEqual(true);
+      expect(res.body).toBeUndefined();
+
+      expect(scope.isDone()).toEqual(true);
+    });
+  });
+
   describe('misc', () => {
     it('actually returns void when no parser', async () => {
       const scope = nock(baseUrl).get('/boop').reply(200, 'OK');
