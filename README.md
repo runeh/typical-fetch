@@ -125,7 +125,6 @@ type FetchUsersCall = (args: {
 
 ### todo
 
-- Just have one arg, which has `baseUrl` ?
 - parser for text or whatever
 - error if both parse and parseBody
 - pass response to mappers?
@@ -135,7 +134,6 @@ type FetchUsersCall = (args: {
 - Add kitchen sink tests
 - follow redirects?
 - test for redirect stuff
-- support parser fun for args? As in `args(e => rt.String.check(e))`
 - pass in args to parsers
 - jsdoc
 - figure out good way of dealing with http errors / other

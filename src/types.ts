@@ -50,8 +50,8 @@ export interface CallRecord {
 
 export class TypicalWrappedError extends Error {
   name = 'TypicalWrappedError';
-  constructor(public wrappedError: unknown, message?: string) {
-    super(`${message ?? 'unknown'}`);
+  constructor(public wrappedError: unknown) {
+    super(wrappedError instanceof Error ? wrappedError.name : 'unknown');
   }
 }
 

@@ -340,7 +340,7 @@ describe('call builder', () => {
       const res = await fetcher({ baseUrl });
 
       expect(res.success).toEqual(false);
-      expect(res.error).toMatchInlineSnapshot(`[TypicalWrappedError: unknown]`);
+      expect(res.error).toMatchInlineSnapshot(`[TypicalWrappedError: Error]`);
       expect(scope.isDone()).toEqual(true);
     });
 
@@ -666,9 +666,7 @@ describe('call builder', () => {
 
       expect(res.success).toEqual(false);
       expect(res?.error?.name).toEqual('TypicalWrappedError');
-      expect(res?.error).toMatchInlineSnapshot(
-        `[TypicalWrappedError: unknown]`,
-      );
+      expect(res?.error).toMatchInlineSnapshot(`[TypicalWrappedError: Error]`);
       expect(scope.isDone()).toEqual(true);
     });
 
