@@ -143,6 +143,10 @@ type FetchUsersCall = (args: {
 - test for throwing in weird places
 - Have more custom errors? like at least JSON parsing at least?
 - should path default to `/` ?
+- example wrapper for people that prefer throwing
+- add example that talks to https://jsonplaceholder.typicode.com
+- update this file
+- docs
 
 #### maybe
 
