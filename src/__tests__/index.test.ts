@@ -493,7 +493,7 @@ describe('call builder', () => {
       invariant(res.success === false);
       const err = unwrapError(res.error);
       expect(err).toMatchInlineSnapshot(
-        `[FetchError: invalid json response body at http://www.example.org/boop reason: Unexpected token m in JSON at position 2]`,
+        `[SyntaxError: Unexpected token m in JSON at position 2]`,
       );
       expect(scope.isDone()).toEqual(true);
     });

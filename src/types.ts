@@ -49,9 +49,9 @@ export interface CallRecord {
   readonly mapError: ((arg: any) => unknown)[];
   readonly mappers: ((res: any, arg: any) => unknown)[];
   readonly method?: HttpMethod;
-  readonly parseJson?: (arg: unknown) => unknown;
+  readonly parseJson?: (json: unknown, arg: any) => unknown;
   readonly parseResponse?: (res: Response, arg: any) => unknown;
-  readonly parseText?: (body: string, arg: unknown) => unknown;
+  readonly parseText?: (body: string, arg: any) => unknown;
 }
 
 export class TypicalWrappedError extends Error {

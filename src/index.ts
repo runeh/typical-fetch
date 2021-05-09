@@ -123,17 +123,13 @@ class CallBuilder<
   parseJson<T>(
     parser: (data: unknown, args: Arg) => T,
   ): CallBuilder<T, Arg, Err> {
-    const wrappedParser = async (res: Response, args: Arg) =>
-      parser(await res.json(), args);
-    return this.parseResponse(wrappedParser);
+    return new CallBuilder({ ...this.record, parseJson: parser });
   }
 
   parseText<T>(
     parser: (data: string, args: Arg) => T,
   ): CallBuilder<T, Arg, Err> {
-    const wrappedParser = async (res: Response, args: Arg) =>
-      parser(await res.text(), args);
-    return this.parseResponse(wrappedParser);
+    return new CallBuilder({ ...this.record, parseText: parser });
   }
 
   parseResponse<T>(
@@ -190,12 +186,13 @@ class CallBuilder<
         if (parseResponse) {
           data = await parseResponse(res, args);
         } else if (parseText) {
-          // fixme: this is dead code for now
+          const text = await res.text();
+          const parsed = parseText(text, args);
+          data = parsed;
         } else if (parseJson) {
-          // fixme: this is dead code for now
           const text = await res.text();
           const json = JSON.parse(text);
-          const parsed = parseJson(json);
+          const parsed = parseJson(json, args);
           data = parsed;
         } else {
           // fixme: might be binary or text or whatevs

@@ -125,8 +125,9 @@ type FetchUsersCall = (args: {
 
 ### todo
 
+- arg thingy! to record?
+
 - sanity check parser. Choke if a parser is registered already
-- parser for text
 - error if both parse and parseBody
 - pass response to mappers? That seems good if you need to know redirect url or
   some header or whatever
@@ -136,7 +137,6 @@ type FetchUsersCall = (args: {
 - Add kitchen sink tests
 - follow redirects?
 - test for redirect stuff
-- pass in args to parsers
 - jsdoc
 - figure out good way of dealing with http errors / other
 - Return status somehow?
