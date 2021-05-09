@@ -125,10 +125,12 @@ type FetchUsersCall = (args: {
 
 ### todo
 
-- parser for text or whatever
+- sanity check parser. Choke if a parser is registered already
+- parser for text
 - error if both parse and parseBody
-- pass response to mappers?
-- Wrap response in a proxy that throws if you try to edit/call it?
+- pass response to mappers? That seems good if you need to know redirect url or
+  some header or whatever
+- `.baseUrl(` should support function
 - can parseJson just add two parsers? one for text->unknown and then the user
   provided one?
 - Add kitchen sink tests
@@ -145,13 +147,14 @@ type FetchUsersCall = (args: {
 - interceptor / event handlers?
 - clean up where error handling happens
 - test for throwing in weird places
-- support passing in baseUrl when building? Or a `host()`. If present, skip the
-  arg.
 - Have more custom errors? like at least JSON parsing at least?
 - should path default to `/` ?
+- probably special case json / text parsing. So we can call .text() and return
+  it in cases where something throws?
 
 #### maybe
 
+- Wrap response in a proxy that throws if you try to edit/call it?
 - Narrow after calling `method` and `path`?
 - Support array as return value from `path`? As in
   `['users', userId,'pages',pageNum]` turns into

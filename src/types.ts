@@ -1,6 +1,10 @@
 import { Readable } from 'stream';
 import { URL, URLSearchParams } from 'url';
-import { HeadersInit, BodyInit as OriginalBodyInit } from 'node-fetch';
+import {
+  HeadersInit,
+  BodyInit as OriginalBodyInit,
+  Response,
+} from 'node-fetch';
 
 export type CallReturn<Ret, Err> =
   | { success: true; body: Ret; error: undefined }
@@ -45,6 +49,7 @@ export interface CallRecord {
   readonly errorMappers: ((error: any, arg: any) => unknown)[];
   readonly method?: HttpMethod;
   readonly parseJson?: (arg: unknown) => unknown;
+  readonly parseResponse?: (res: Response, arg: any) => unknown;
   readonly baseUrl?: URL;
 }
 

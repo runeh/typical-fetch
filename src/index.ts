@@ -1,5 +1,5 @@
 import { URL } from 'url';
-import fetch, { HeadersInit } from 'node-fetch';
+import fetch, { HeadersInit, Response } from 'node-fetch';
 import { invariant } from 'ts-invariant';
 import { applyErrorMappers, getFetchParams } from './common';
 import {
@@ -120,8 +120,29 @@ class CallBuilder<
     return new CallBuilder<Ret, Arg, Err>({ ...this.record, getBody });
   }
 
-  parseJson<T>(parser: (data: unknown) => T): CallBuilder<T, Arg, Err> {
-    return new CallBuilder<T, Arg, Err>({ ...this.record, parseJson: parser });
+  parseJson<T>(
+    parser: (data: unknown, args: Arg) => T,
+  ): CallBuilder<T, Arg, Err> {
+    const wrappedParser = async (res: Response, args: Arg) =>
+      parser(await res.json(), args);
+    return this.parseResponse(wrappedParser);
+  }
+
+  parseText<T>(
+    parser: (data: string, args: Arg) => T,
+  ): CallBuilder<T, Arg, Err> {
+    const wrappedParser = async (res: Response, args: Arg) =>
+      parser(await res.text(), args);
+    return this.parseResponse(wrappedParser);
+  }
+
+  parseResponse<T>(
+    parser: (res: Response, args: Arg) => Promise<T> | T,
+  ): CallBuilder<T, Arg, Err> {
+    return new CallBuilder<T, Arg, Err>({
+      ...this.record,
+      parseResponse: parser,
+    });
   }
 
   build(): BuiltCall<Ret, Arg, Err> {
@@ -132,6 +153,7 @@ class CallBuilder<
       method,
       errorMappers,
       parseJson,
+      parseResponse,
     } = this.record;
 
     invariant(getPath != null, 'No path set');
@@ -164,7 +186,10 @@ class CallBuilder<
 
         let data;
 
-        if (parseJson) {
+        if (parseResponse) {
+          data = await parseResponse(res, args);
+        } else if (parseJson) {
+          // fixme: this is dead code for now
           const text = await res.text();
           const json = JSON.parse(text);
           const parsed = parseJson(json);

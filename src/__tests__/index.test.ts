@@ -12,6 +12,7 @@ describe('call builder', () => {
   describe('method', () => {
     it('get', async () => {
       const scope = nock(baseUrl).get('/boop').reply(200, 'OK');
+
       const fetcher = buildCall().path('/boop').method('get').build();
 
       await fetcher({ baseUrl });
@@ -21,6 +22,7 @@ describe('call builder', () => {
 
     it('post', async () => {
       const scope = nock(baseUrl).post('/boop').reply(200, 'OK');
+
       const fetcher = buildCall().path('/boop').method('post').build();
 
       await fetcher({ baseUrl });
@@ -30,6 +32,7 @@ describe('call builder', () => {
 
     it('head', async () => {
       const scope = nock(baseUrl).head('/boop').reply(200, 'OK');
+
       const fetcher = buildCall().path('/boop').method('head').build();
 
       await fetcher({ baseUrl });
@@ -39,6 +42,7 @@ describe('call builder', () => {
 
     it('put', async () => {
       const scope = nock(baseUrl).put('/boop').reply(200, 'OK');
+
       const fetcher = buildCall().path('/boop').method('put').build();
 
       await fetcher({ baseUrl });
@@ -48,6 +52,7 @@ describe('call builder', () => {
 
     it('delete', async () => {
       const scope = nock(baseUrl).delete('/boop').reply(200, 'OK');
+
       const fetcher = buildCall().path('/boop').method('delete').build();
 
       await fetcher({ baseUrl });
@@ -57,6 +62,7 @@ describe('call builder', () => {
 
     it('patch', async () => {
       const scope = nock(baseUrl).patch('/boop').reply(200, 'OK');
+
       const fetcher = buildCall().path('/boop').method('patch').build();
 
       await fetcher({ baseUrl });
@@ -68,6 +74,7 @@ describe('call builder', () => {
   describe('path', () => {
     it('string path', async () => {
       const scope = nock(baseUrl).get('/boop').reply(200, 'OK');
+
       const fetcher = buildCall().path('/boop').method('get').build();
 
       await fetcher({ baseUrl });
@@ -77,6 +84,7 @@ describe('call builder', () => {
 
     it('callback path no args', async () => {
       const scope = nock(baseUrl).get('/boop').reply(200, 'OK');
+
       const fetcher = buildCall()
         .method('get')
         .path(() => '/boop')
@@ -89,6 +97,7 @@ describe('call builder', () => {
 
     it('callback path with args', async () => {
       const scope = nock(baseUrl).get('/name/rune').reply(200, 'OK');
+
       const fetcher = buildCall()
         .method('get')
         .args<{ name: string }>()
@@ -102,6 +111,7 @@ describe('call builder', () => {
 
     it('merges with path from baseUrl when no leading slash', async () => {
       const scope = nock(baseUrl).get('/superpath/subpath').reply(200, 'OK');
+
       const fetcher = buildCall().method('get').path('subpath').build();
 
       await fetcher({ baseUrl: 'http://www.example.org/superpath' });
@@ -110,6 +120,7 @@ describe('call builder', () => {
 
     it('merges with path from baseUrl when no leading slash and baseUrl is URL', async () => {
       const scope = nock(baseUrl).get('/superpath/subpath').reply(200, 'OK');
+
       const fetcher = buildCall().method('get').path('subpath').build();
 
       await fetcher({ baseUrl: new URL('http://www.example.org/superpath') });
@@ -120,6 +131,7 @@ describe('call builder', () => {
   describe('query parameters', () => {
     it('object', async () => {
       const scope = nock(baseUrl).get('/boop?foo=bar').reply(200, 'OK');
+
       const fetcher = buildCall()
         .path('/boop')
         .method('get')
@@ -135,6 +147,7 @@ describe('call builder', () => {
       const scope = nock(baseUrl)
         .get('/boop?foo=bar&baz=phlebotinum')
         .reply(200, 'OK');
+
       const fetcher = buildCall()
         .path('/boop')
         .method('get')
@@ -152,6 +165,7 @@ describe('call builder', () => {
       const scope = nock(baseUrl)
         .get('/boop?foo=first&foo=second')
         .reply(200, 'OK');
+
       const fetcher = buildCall()
         .path('/boop')
         .method('get')
@@ -166,6 +180,7 @@ describe('call builder', () => {
 
     it('callback returning object', async () => {
       const scope = nock(baseUrl).get('/boop?foo=first').reply(200, 'OK');
+
       const fetcher = buildCall()
         .path('/boop')
         .method('get')
@@ -179,6 +194,7 @@ describe('call builder', () => {
 
     it('urlsearchparams as value', async () => {
       const scope = nock(baseUrl).get('/boop?foo=first').reply(200, 'OK');
+
       const fetcher = buildCall()
         .path('/boop')
         .method('get')
@@ -192,6 +208,7 @@ describe('call builder', () => {
 
     it('urlsearchparams as callback', async () => {
       const scope = nock(baseUrl).get('/boop?foo=first').reply(200, 'OK');
+
       const fetcher = buildCall()
         .path('/boop')
         .method('get')
@@ -208,6 +225,7 @@ describe('call builder', () => {
       const scope = nock(baseUrl)
         .get('/boop?foo=first&name=rune')
         .reply(200, 'OK');
+
       const fetcher = buildCall()
         .path('/boop')
         .method('get')
@@ -228,6 +246,7 @@ describe('call builder', () => {
         .get('/boop')
         .reply(200, 'OK')
         .matchHeader('User-Agent', 'typical-fetch');
+
       const fetcher = buildCall()
         .path('/boop')
         .method('get')
@@ -244,6 +263,7 @@ describe('call builder', () => {
         .get('/boop')
         .reply(200, 'OK')
         .matchHeader('User-Agent', 'typical-fetch');
+
       const fetcher = buildCall()
         .path('/boop')
         .method('get')
@@ -260,6 +280,7 @@ describe('call builder', () => {
         .get('/boop')
         .reply(200, 'OK')
         .matchHeader('User-Agent', 'typical-fetch');
+
       const fetcher = buildCall()
         .path('/boop')
         .method('get')
@@ -276,6 +297,7 @@ describe('call builder', () => {
         .get('/boop')
         .reply(200, 'OK')
         .matchHeader('User-Agent', 'typical-fetch');
+
       const fetcher = buildCall()
         .path('/boop')
         .method('get')
@@ -294,6 +316,7 @@ describe('call builder', () => {
         .reply(200, 'OK')
         .matchHeader('User-Agent', 'typical-fetch')
         .matchHeader('token', 'abcd');
+
       const fetcher = buildCall()
         .headers({ token: 'abcd' })
         .path('/boop')
@@ -307,11 +330,46 @@ describe('call builder', () => {
     });
   });
 
+  describe('response parsing', () => {
+    it('synchronous parser', async () => {
+      const scope = nock(baseUrl).get('/boop').reply(201, 'OK');
+
+      const fetcher = buildCall()
+        .path('/boop')
+        .method('get')
+        .parseResponse((res) => res.status)
+        .build();
+
+      const res = await fetcher({ baseUrl });
+
+      expect(res.body).toEqual(201);
+      expect(scope.isDone()).toEqual(true);
+    });
+
+    it('asynchronous parser', async () => {
+      const scope = nock(baseUrl).get('/boop').reply(201, 'OK');
+
+      const fetcher = buildCall()
+        .path('/boop')
+        .method('get')
+        .parseResponse(async (res) => res.status)
+        .build();
+
+      const res = await fetcher({ baseUrl });
+
+      expect(res.body).toEqual(201);
+      expect(scope.isDone()).toEqual(true);
+    });
+
+    it.todo('parser gets args');
+  });
+
   describe('json parsing', () => {
     it('basic', async () => {
       const scope = nock(baseUrl)
         .get('/boop')
         .reply(200, { user: { name: 'Rune' } });
+
       const fetcher = buildCall()
         .path('/boop')
         .method('get')
@@ -328,6 +386,7 @@ describe('call builder', () => {
       const scope = nock(baseUrl)
         .get('/boop')
         .reply(200, { user: { name: 'Rune' } });
+
       const fetcher = buildCall()
         .path('/boop')
         .method('get')
@@ -348,6 +407,7 @@ describe('call builder', () => {
       const scope = nock(baseUrl)
         .get('/boop')
         .reply(200, '{ malformed: "missing close brace ->" ');
+
       const fetcher = buildCall()
         .path('/boop')
         .method('get')
@@ -362,7 +422,7 @@ describe('call builder', () => {
       invariant(res.success === false);
       const err = unwrapError(res.error);
       expect(err).toMatchInlineSnapshot(
-        `[SyntaxError: Unexpected token m in JSON at position 2]`,
+        `[FetchError: invalid json response body at http://www.example.org/boop reason: Unexpected token m in JSON at position 2]`,
       );
       expect(scope.isDone()).toEqual(true);
     });
@@ -640,6 +700,7 @@ describe('call builder', () => {
   describe('error return values', () => {
     it('smoke 1', async () => {
       const scope = nock(baseUrl).get('/boop').reply(500);
+
       const fetcher = buildCall().path('/boop').method('get').build();
 
       const res = await fetcher({ baseUrl });
@@ -654,6 +715,7 @@ describe('call builder', () => {
 
     it('smoke 2', async () => {
       const scope = nock(baseUrl).get('/boop').reply(200);
+
       const fetcher = buildCall()
         .path('/boop')
         .method('get')
@@ -672,6 +734,7 @@ describe('call builder', () => {
 
     it('error mapper 1', async () => {
       const scope = nock(baseUrl).get('/boop').reply(500);
+
       const fetcher = buildCall()
         .path('/boop')
         .method('get')
@@ -733,6 +796,7 @@ describe('buildUrl', () => {
   describe('baseUrl in builder', () => {
     it('Works when no other args', async () => {
       const scope = nock(baseUrl).get('/boop').reply(200, 'OK');
+
       const fetcher = buildCall()
         .baseUrl(baseUrl)
         .path('/boop')
@@ -748,6 +812,7 @@ describe('buildUrl', () => {
 
     it('Works when other args', async () => {
       const scope = nock(baseUrl).get('/boop/1').reply(200, 'OK');
+
       const fetcher = buildCall()
         .baseUrl(baseUrl)
         .args<{ id: number }>()
@@ -766,6 +831,7 @@ describe('buildUrl', () => {
   describe('misc', () => {
     it('actually returns void when no parser', async () => {
       const scope = nock(baseUrl).get('/boop').reply(200, 'OK');
+
       const fetcher = buildCall().path('/boop').method('get').build();
 
       const res = await fetcher({ baseUrl });
