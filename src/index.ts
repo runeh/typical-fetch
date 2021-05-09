@@ -10,6 +10,7 @@ import {
   MergedArgs,
   QueryParam,
   TypicalHttpError,
+  TypicalRequestInit,
   TypicalWrappedError,
 } from './types';
 
@@ -58,6 +59,13 @@ class CallBuilder<
     return new CallBuilder<Ret, Omit<Arg, 'baseUrl'>, Err>({
       ...this.record,
       baseUrl,
+    });
+  }
+
+  fetchOptions(opts: TypicalRequestInit): CallBuilder<Ret, Arg, Err> {
+    return new CallBuilder({
+      ...this.record,
+      requestInit: { ...this.record.requestInit, ...opts },
     });
   }
 
@@ -190,6 +198,7 @@ class CallBuilder<
       parseJson,
       parseResponse,
       parseText,
+      requestInit,
     } = this.record;
 
     invariant(getPath != null, 'No path set');
@@ -207,7 +216,7 @@ class CallBuilder<
           args,
         );
 
-        const res = await fetch(url, { method, headers, body });
+        const res = await fetch(url, { ...requestInit, method, headers, body });
         if (!res.ok) {
           return {
             success: false,

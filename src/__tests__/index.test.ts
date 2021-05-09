@@ -128,6 +128,60 @@ describe('call builder', () => {
     });
   });
 
+  describe('redirects', () => {
+    it('redirects by default', async () => {
+      const scope = nock(baseUrl)
+        .get('/boop')
+        .reply(302, undefined, {
+          Location: 'http://www.example.org/redirected',
+        })
+        .get('/redirected')
+        .reply(204, 'OK');
+
+      const fetcher = buildCall()
+        .path('/boop')
+        .method('get')
+        .parseResponse((e) => {
+          return e.status;
+        })
+        .build();
+
+      const res = await fetcher({ baseUrl });
+      expect(res.success);
+      expect(res.body).toEqual(204);
+      expect(scope.isDone()).toEqual(true);
+    });
+
+    /**
+     * Todo:
+     * This now throws because we check for `.ok`, which is only true for
+     * status codes between 200-299.
+     *
+     * What do we want to do? Check the fetchoptions thing before raising an
+     * error?
+     */
+    it.skip('can disable redirects', async () => {
+      const scope = nock(baseUrl).get('/boop').reply(302, undefined, {
+        Location: 'http://www.example.org/redirected',
+      });
+
+      const fetcher = buildCall()
+        .path('/boop')
+        .method('get')
+        .fetchOptions({ redirect: 'manual' })
+        .parseResponse((e) => {
+          return e.status;
+        })
+        .build();
+
+      const res = await fetcher({ baseUrl });
+      console.log(res);
+      expect(res.success);
+      expect(res.body).toEqual(204);
+      expect(scope.isDone()).toEqual(true);
+    });
+  });
+
   describe('query parameters', () => {
     it('object', async () => {
       const scope = nock(baseUrl).get('/boop?foo=bar').reply(200, 'OK');
@@ -332,7 +386,7 @@ describe('call builder', () => {
 
   describe('response parsing', () => {
     it('synchronous parser', async () => {
-      const scope = nock(baseUrl).get('/boop').reply(201, 'OK');
+      const scope = nock(baseUrl).get('/boop').reply(204, 'OK');
 
       const fetcher = buildCall()
         .path('/boop')
@@ -342,7 +396,7 @@ describe('call builder', () => {
 
       const res = await fetcher({ baseUrl });
 
-      expect(res.body).toEqual(201);
+      expect(res.body).toEqual(204);
       expect(scope.isDone()).toEqual(true);
     });
 
@@ -363,7 +417,7 @@ describe('call builder', () => {
     });
 
     it('asynchronous parser', async () => {
-      const scope = nock(baseUrl).get('/boop').reply(201, 'OK');
+      const scope = nock(baseUrl).get('/boop').reply(204, 'OK');
 
       const fetcher = buildCall()
         .path('/boop')
@@ -373,7 +427,7 @@ describe('call builder', () => {
 
       const res = await fetcher({ baseUrl });
 
-      expect(res.body).toEqual(201);
+      expect(res.body).toEqual(204);
       expect(scope.isDone()).toEqual(true);
     });
   });

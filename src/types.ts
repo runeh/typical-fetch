@@ -4,6 +4,7 @@ import {
   HeadersInit,
   BodyInit as OriginalBodyInit,
   Response,
+  RequestInit,
 } from 'node-fetch';
 
 export type CallReturn<Ret, Err> =
@@ -52,6 +53,7 @@ export interface CallRecord {
   readonly parseJson?: (json: unknown, arg: any) => unknown;
   readonly parseResponse?: (res: Response, arg: any) => unknown;
   readonly parseText?: (body: string, arg: any) => unknown;
+  readonly requestInit?: TypicalRequestInit;
 }
 
 export class TypicalWrappedError extends Error {
@@ -67,6 +69,8 @@ export class TypicalHttpError extends Error {
     super(message ?? `Status: ${status}`);
   }
 }
+
+export type TypicalRequestInit = Pick<RequestInit, 'redirect'>;
 
 interface JsonObject {
   [member: string]: JsonValue;
