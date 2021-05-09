@@ -208,6 +208,8 @@ class CallBuilder<
     }
 
     const fun = async (args: Arg) => {
+      let res: Response | undefined = undefined;
+      let text: string | undefined = undefined;
       const baseUrl = this.record.baseUrl ?? args.baseUrl;
       try {
         const { body, headers, url } = getFetchParams(
@@ -216,7 +218,7 @@ class CallBuilder<
           args,
         );
 
-        const res = await fetch(url, { ...requestInit, method, headers, body });
+        res = await fetch(url, { ...requestInit, method, headers, body });
         if (!res.ok) {
           return {
             success: false,
@@ -234,11 +236,11 @@ class CallBuilder<
         if (parseResponse) {
           data = await parseResponse(res, args);
         } else if (parseText) {
-          const text = await res.text();
+          text = await res.text();
           const parsed = parseText(text, args);
           data = parsed;
         } else if (parseJson) {
-          const text = await res.text();
+          text = await res.text();
           const json = JSON.parse(text);
           const parsed = parseJson(json, args);
           data = parsed;
@@ -259,7 +261,7 @@ class CallBuilder<
           success: false,
           body: undefined,
           error: applyErrorMappers(
-            new TypicalWrappedError(error),
+            new TypicalWrappedError(error, res, text),
             errorMappers,
             args,
           ),

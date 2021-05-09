@@ -5,7 +5,6 @@
 - pass response to mappers? That seems good if you need to know redirect url or
   some header or whatever. Or should people be using parseResponse in that case?
 - Add kitchen sink tests
-- follow redirects?
 - test for redirect stuff
 - jsdoc
 - figure out good way of dealing with http errors / other
@@ -19,14 +18,13 @@
 - Have more custom errors? like at least JSON parsing at least?
 - should path default to `/` ?
 - example wrapper for people that prefer throwing
-- add example that talks to https://jsonplaceholder.typicode.com
-- update this file
 - docs
 - add response text if available to error
 - should there be a `fetchInit` method if you need to pass extra fetch stuff?
   Useful for `redirect`, `mode` and `credentials`.
 - if you want text out of a response, you need to do `parseText(e => e)` which
   is a bit lame..
+- tests for text/response in error object
 
 ## maybe
 
