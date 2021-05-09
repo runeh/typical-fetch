@@ -98,6 +98,19 @@ async function jsonRequestWithMultipleMappers() {
   }
 }
 
+const fetcher = buildCall()
+  .method('get')
+  .headers({ 'user-agent': 'typical-fetch' })
+  .path('/user-names')
+  .parseJson((data) => {
+    if (Array.isArray(data) && data.every((e) => typeof e === 'string')) {
+      return data as string[];
+    } else {
+      throw new Error('Unexpected data');
+    }
+  })
+  .build();
+
 async function main() {
   await getRequest();
   await jsonRequest();
@@ -106,3 +119,38 @@ async function main() {
 }
 
 main();
+
+const baseBuilder = buildCall()
+  .args<{ apiToken: string }>()
+  .baseUrl('https://example.org/api')
+  .headers((args) => ({
+    'user-agent': 'typical-fetch',
+    authorizaton: `Bearer ${args.apiToken}`,
+  }));
+
+const getUser = baseBuilder
+  .args<{ id: string }>()
+  .method('get')
+  .path((args) => `/user/${args.id}`)
+  .parseJson((data) => {
+    return parseUsers(data);
+  })
+  .build();
+
+const createUser = baseBuilder
+  .args<{ name: string; birthDate: string }>()
+  .method('post')
+  .path('/user')
+  .body((args) => {
+    return { name: args.name, birthDate: args.birthDate };
+  })
+  .parseJson((data) => parseUser(data))
+  .build();
+
+const createResult = await createUser({
+  apiToken: 'asdf',
+  name: 'Rune',
+  birthDate: '1975-05-24',
+});
+
+const userId = createResult.body;

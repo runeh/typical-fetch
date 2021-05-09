@@ -1,162 +1,308 @@
 # typical-fetch
 
-Generate function for performing type safe HTTP calls.
+Toolkit for creating strongly typed HTTP calls.
 
-## Notes
+`typical-fetch` lets users generate functions that perform HTTP calls. This is
+useful both when hand-crafting API clients, or for tools that generate API
+client code.
 
-How the API to define functions looks isn't super important. It could be a
-builder, or by passing an object or something else.
+Principles:
+
+- All inputs and outputs should be strongly typed by default
+- Errors are treated as return values, not by throwing, so they can be
+  exhaustively checked.
+
+## API
+
+todo
 
 ## Examples
 
 ### Basic
 
-```typescript
-const fetchUsers = typicalFetch
-  .build()
-  .method('GET')
-  .headers({ Authorization: 'anonymous' })
-  .path('/users.json');
+Generate function that sends a `GET` result to the `/ping/` path of the base url
+passed in to the function. In this case `https://example.org/api/ping`.
 
-type fetchUsersCall = () => Promise<
-  | { success: true; error: undefined; response: unknown }
-  | { success: false; error: unknown; response: undefined }
->;
+```typescript
+const fetcher = buildCall().method('get').path('/ping').build();
+
+await getRequest({ baseUrl: 'https://example.org/api' });
 ```
 
-### Parser
+### Post some JSON
+
+Generate a function that sends a `POST` containing the JSON `{ name: 'Rune' }`.
 
 ```typescript
-// Assuming the JSON is of shape `["name1", "name2"]`
-function parseUsers(raw: unknown): string[] {
-  const parsed = JSON.parse(raw);
-  return parsed;
-}
+const fetcher = buildCall()
+  .method('post')
+  .path('/create-user')
+  .body({ name: 'Rune' })
+  .build();
 
-const fetchUsers = typicalFetch
-  .build()
-  .method('GET')
-  .headers({ Authorization: 'anonymous' })
-  .path('/users.json')
-  .parser(parseUser);
-
-type fetchUsersCall = () => Promise<
-  | { success: true; error: undefined; response: string[] }
-  | { success: false; error: unknown; response: undefined }
->;
+await getRequest({ baseUrl: 'https://example.org/api' });
 ```
 
-### Kitchen sink
+### Post some JSON as an argument
+
+Generate a function that sends a `POST` containing some JSON, where the data to
+send is passed in as arguments to the function.
 
 ```typescript
-/**
- * the parser should use runtypes or typanion or something validate the  body
- * of the response.
- * Here is a runtypes example where the shape of the response is:
- * [{ "id": "1234", "name": "Rune", "signupDate": "2020-08-11" }]
- *
- * @param raw
- * @returns
- */
+const fetcher = buildCall()
+  .args<{ userName: string }>()
+  .method('post')
+  .path('/create-user')
+  .body((args) => ({ name: args.userName }))
+  .build();
 
-function parseUsers(raw: string): string[] {
-  const json = JSON.parse(raw);
-  const runtype = rt.Array(
-    rt.Record({
-      id: rt.String,
-      name: rt.String,
-      signupDate: rt.String,
-    }),
-  );
-  return runtype.check(json);
-}
+await getRequest({
+  baseUrl: 'https://example.org/api',
+  name: 'Rune',
+});
+```
 
-const fetchUsers = typicalFetch
-  .build()
-  .arguments<{ token: string; orgId: string; sortOrder: 'asc' | 'desc' }>()
-  .method('GET')
-  .path((args) => `/org/${args.orgId}/users`)
-  .headers({ 'User-Agent': 'typical-fetch' })
-  .headers((args) => ({ Authorization: `Bearer ${args.token}` }))
-  .parser(parseUsers)
-  .map((res) => {
-    // res is the return from parseUser
-    // this function can do whatever transforms it wants. In this case, convert
-    // the signupDate field from a string to a Date object
-    return res.map((person) => {
-      return { ...person, signupDate: new Date(person.signupDate) };
-    });
-  })
-  .catch((err: unknown) => {
-    // map whatever error can occur to a well known type. Usually you'd
-    // have a number of well known error types that can be returned
-    if (err instanceof rt.ValidationError) {
-      return { name: 'validationError' };
-    } else if (err instanceof HttpError) {
-      // httperror is provided by typical-fetch, to signal 404 and whatever
-      return { name: 'httpError', status: err.status };
+### Fetch some JSON and parse it
+
+Generate a function that sends a `GET` request that returns some JSON. Invoke a
+parser function that converts the JSON to a known type.
+
+For this example, assume the data returned from the server looks like this:
+`["foo", "bar", "baz"]`.
+
+```typescript
+const getUsers = buildCall()
+  .method('get')
+  .path('/user-names')
+  .parseJson((data) => {
+    if (Array.isArray(data) && data.every((e) => typeof e === 'string')) {
+      return data as string[];
     } else {
-      return { name: 'unknown error!' };
+      throw new Error('Unexpected data');
     }
-  });
+  })
+  .build();
 
-// types of the generated fetchUsers function and data
-
-type FetchUsersCallResult = Array<{
-  id: string;
-  name: string;
-  signupDate: Date;
-}>;
-
-type FetchUsersCallError =
-  | { name: 'validationError' }
-  | { name: 'httpError'; status: err.status }
-  | { name: 'unknown error!' };
-
-type FetchUsersCall = (args: {
-  token: string;
-  orgId: string;
-  sortOrder: 'asc' | 'desc';
-}) => Promise<
-  | { success: true; result: FetchUsersCallResult; error: undefined }
-  | { success: false; result: undefined; error: FetchUsersCallError }
->;
+const result = await getUsers({ baseUrl: 'https://example.org/api' });
+if (result.success) {
+  console.log(result.data);
+}
 ```
 
-### todo
+### Fetch some JSON, parse and transform it
 
-- pass response to mappers? That seems good if you need to know redirect url or
-  some header or whatever. Or should people be using parseResponse in that case?
-- `.baseUrl(` should support function
-- Add kitchen sink tests
-- follow redirects?
-- test for redirect stuff
-- jsdoc
-- figure out good way of dealing with http errors / other
-- Return status somehow?
-- Helpers for isWrappedError etc?
-- Add response object to the result?
-- test for file uploads
-- interceptor / event handlers?
-- clean up where error handling happens
-- test for throwing in weird places
-- Have more custom errors? like at least JSON parsing at least?
-- should path default to `/` ?
-- example wrapper for people that prefer throwing
-- add example that talks to https://jsonplaceholder.typicode.com
-- update this file
-- docs
-- add response text if available to error
-- should there be a `fetchInit` method if you need to pass extra fetch stuff?
-  Useful for `redirect`, `mode` and `credentials`.
+Generate a function that sends a `GET` request that returns some JSON. Invoke a
+parser function that converts the JSON to a known type. After parsing, pass the
+data to a `map` function, to transform it.
 
-#### maybe
+For this example, assume the data returned from the server looks like this:
+`["2018-04-24", "2019-08-03", "2020-11-19"]`.
 
-- Wrap response in a proxy that throws if you try to edit/call it?
-- Narrow after calling `method` and `path`?
-- Support array as return value from `path`? As in
-  `['users', userId,'pages',pageNum]` turns into
-  `/users/${userId}/pages/${pageNum}`
-- Make CallRecord typed?
-- Weird / fancy `error(something)` return value to not have to throw in mappers
-  etc?
+After parsing and mapping, the result is an array of `Date` objects.
+
+```typescript
+const getUsers = buildCall()
+  .method('get')
+  .path('/dates')
+  .parseJson((data) => {
+    if (Array.isArray(data) && data.every((e) => typeof e === 'string')) {
+      return data as string[];
+    } else {
+      throw new Error('Unexpected data');
+    }
+  })
+  .map((data) => data.map((dateString) => new Date(dateString)))
+  .build();
+
+const result = await getUsers({ baseUrl: 'https://example.org/api' });
+if (result.success) {
+  console.log(result.data);
+}
+```
+
+### Parse a request object
+
+Generate a function that sends a `POST` request that receives a `201: Created`
+response. Use the `parseResponse` to extract the location header from the
+response object, and return that as the return value of the function.
+
+```typescript
+const createNote = buildCall()
+  .method('post')
+  .path('/notes')
+  .parseResponse((res) => {
+    return res.headers.location;
+  })
+  .build();
+
+const result = await createNote({ baseUrl: 'https://example.org/api' });
+if (result.success) {
+  console.log(result.data);
+}
+```
+
+### Fetch some text and parse it
+
+Generate a function that sends a `GET` request that fetches some semi colon
+separated lines and parses it into an array of arrays.
+
+```typescript
+const getLines = buildCall()
+  .method('get')
+  .path('/csv')
+  .parseText((data) => {
+    return data.split('\n').map((line) => line.split(';'));
+  })
+  .build();
+
+const result = await getLines({ baseUrl: 'https://example.org/api' });
+if (result.success) {
+  console.log(result.data);
+}
+```
+
+Generate a function takes arguments that are used to set the correct path and
+query parameters for the request.
+
+### Use arguments for path and query
+
+```typescript
+const getTeamMembers = buildCall()
+  .args<{ teamId: string; sortOrder: 'asc' | 'desc' }>()
+  .method('get')
+  .path('/users')
+  .parseJson((data) => {
+    return parseTeamMembers(data);
+  })
+  .build();
+
+const result = await getTeamMembers({
+  baseUrl: 'https://example.org/api',
+  teamId: '1234',
+  sortOrder: 'asc',
+});
+
+if (result.success) {
+  console.log(result.data);
+}
+```
+
+Generate a function with `baseUrl` and some headers set as part of the builder.
+This means the baseUrl does not need to be passed as an argument when caling the
+function.
+
+### Use constant baseUrl and set some headers
+
+```typescript
+const getUsers = buildCall()
+  .baseUrl('https://example.org/api')
+  .headers({ 'user-agent': 'typical-fetch' })
+  .method('get')
+  .path('/users')
+  .parseJson((data) => {
+    return parseUsers(data);
+  })
+  .build();
+
+const result = await getUsers();
+
+if (result.success) {
+  console.log(result.data);
+}
+```
+
+### Use base builder to create multiple calls
+
+Generate two different functions, one for a `GET` and one for a `POST` that
+share a lot of setup code by building off a common builder.
+
+```typescript
+const baseBuilder = buildCall()
+  .args<{ apiToken: string }>()
+  .baseUrl('https://example.org/api')
+  .headers((args) => ({
+    'user-agent': 'typical-fetch',
+    authorizaton: `Bearer ${args.apiToken}`,
+  }));
+
+const getUser = baseBuilder
+  .args<{ id: string }>()
+  .method('get')
+  .path((args) => `/user/${args.id}`)
+  .parseJson((data) => {
+    return parseUsers(data);
+  })
+  .build();
+
+const createUser = baseBuilder
+  .args<{ name: string; birthDate: string }>()
+  .method('post')
+  .path('/user')
+  .body((args) => {
+    return { name: args.name, birthDate: args.birthDate };
+  })
+  .parseJson((data) => parseUser(data))
+  .build();
+
+const createResult = await createUser({
+  apiToken: 'asdf',
+  name: 'Rune',
+  birthDate: '1975-05-24',
+});
+
+// Normally we would should check for errors on the result
+const userId = createResult.body.id;
+```
+
+### Handle errors
+
+Generate a function that sends a `GET` request that gets an error response from
+the server. The errors are not thrown, but returned as the `error` value on the
+`result` object. The errors returned are one of two types. Either
+`TypicalHttpError` or `TypicalWrappedError`. The latter wraps an inner exception
+that is likely more specific.
+
+```typescript
+const fetcher = buildCall().method('get').path('/error').build();
+
+const result = await fetcher({ baseUrl: 'https://example.org/api' });
+
+if (result.success === false) {
+  const error = result.error;
+
+  if (error instanceof TypicalHttpError) {
+    console.log(`Got HTTP error ${error.status}`);
+  } else if (error instanceof TypicalWrappedError) {
+    console.log(`Got an error: ${error.wrapped}`);
+  } else {
+    // this can never happen!
+  }
+}
+```
+
+Generate a function that sends a `GET` request that gets an error response from
+the server. The `mapError` function transforms the error objects into strings.
+Thus the `.error` value on the returned `result` object becomes a string, not an
+`error` object.
+
+### Handle errors by mapping them
+
+```typescript
+const fetcher = buildCall()
+  .method('get')
+  .path('/error')
+  .mapError((error) => {
+    if (error instanceof TypicalHttpError) {
+      return `Got HTTP error ${error.status}`;
+    } else {
+      return `Got an error: ${error.wrapped}`;
+    }
+  })
+  .build();
+
+const result = await fetcher({ baseUrl: 'https://example.org/api' });
+
+if (result.success === false) {
+  console.log(result.error);
+}
+```
