@@ -346,6 +346,22 @@ describe('call builder', () => {
       expect(scope.isDone()).toEqual(true);
     });
 
+    it('synchronous parser gets args', async () => {
+      const scope = nock(baseUrl).get('/boop').reply(200, 'OK');
+
+      const fetcher = buildCall()
+        .path('/boop')
+        .method('get')
+        .args<{ addition: number }>()
+        .parseResponse((res, args) => res.status + args.addition)
+        .build();
+
+      const res = await fetcher({ baseUrl, addition: 42 });
+
+      expect(res.body).toEqual(242);
+      expect(scope.isDone()).toEqual(true);
+    });
+
     it('asynchronous parser', async () => {
       const scope = nock(baseUrl).get('/boop').reply(201, 'OK');
 
@@ -360,8 +376,39 @@ describe('call builder', () => {
       expect(res.body).toEqual(201);
       expect(scope.isDone()).toEqual(true);
     });
+  });
 
-    it.todo('parser gets args');
+  describe('text parsing', () => {
+    it('basic', async () => {
+      const scope = nock(baseUrl).get('/boop').reply(200, 'foo;bar;baz');
+
+      const fetcher = buildCall()
+        .path('/boop')
+        .method('get')
+        .parseText((raw) => raw.split(';'))
+        .build();
+
+      const res = await fetcher({ baseUrl });
+
+      expect(res.body).toEqual(['foo', 'bar', 'baz']);
+      expect(scope.isDone()).toEqual(true);
+    });
+
+    it('basic with args', async () => {
+      const scope = nock(baseUrl).get('/boop').reply(200, 'foo;bar;baz');
+
+      const fetcher = buildCall()
+        .path('/boop')
+        .method('get')
+        .args<{ separator: string }>()
+        .parseText((raw, args) => raw.split(args.separator))
+        .build();
+
+      const res = await fetcher({ baseUrl, separator: ';' });
+
+      expect(res.body).toEqual(['foo', 'bar', 'baz']);
+      expect(scope.isDone()).toEqual(true);
+    });
   });
 
   describe('json parsing', () => {
@@ -379,6 +426,30 @@ describe('call builder', () => {
       const res = await fetcher({ baseUrl });
 
       expect(res.body?.user.name).toEqual('Rune');
+      expect(scope.isDone()).toEqual(true);
+    });
+
+    it('basic with args', async () => {
+      const scope = nock(baseUrl)
+        .get('/boop')
+        .reply(200, { user: { name: 'Rune' } });
+
+      const fetcher = buildCall()
+        .path('/boop')
+        .method('get')
+        .args<{ redact: boolean }>()
+        .parseJson((raw, args) => {
+          const data = raw as { user: { name: string } };
+          if (args.redact) {
+            data.user.name = 'redacted';
+          }
+          return data;
+        })
+        .build();
+
+      const res = await fetcher({ baseUrl, redact: true });
+
+      expect(res.body?.user.name).toEqual('redacted');
       expect(scope.isDone()).toEqual(true);
     });
 
@@ -426,8 +497,6 @@ describe('call builder', () => {
       );
       expect(scope.isDone()).toEqual(true);
     });
-
-    it.todo('parser that gets args passed in');
   });
 
   describe('mappers', () => {
@@ -503,8 +572,6 @@ describe('call builder', () => {
       expect(res.body).toEqual('RUNE');
       expect(scope.isDone()).toEqual(true);
     });
-
-    it.todo('mapper that gets args passed in');
   });
 
   describe('request bodies', () => {
@@ -693,8 +760,6 @@ describe('call builder', () => {
 
       expect(scope.isDone()).toEqual(true);
     });
-
-    it.todo('more arg merging tests?');
   });
 
   describe('error return values', () => {
@@ -750,7 +815,6 @@ describe('call builder', () => {
     });
 
     it.todo('runtype failure');
-    it.todo('malformed json failure');
   });
 });
 

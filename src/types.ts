@@ -40,17 +40,18 @@ export type QueryParam = Record<string, string> | URLSearchParams;
 export type BodyType = JsonRoot | BodyInit;
 
 export interface CallRecord {
+  readonly baseUrl?: URL;
+  readonly errorMappers: ((error: any, arg: any) => unknown)[];
   readonly getBody?: (arg: any) => BodyType;
   readonly getHeaders: ((arg: any) => HeadersInit)[];
   readonly getPath?: (arg: any) => string;
   readonly getQuery: ((arg: any) => QueryParam)[];
   readonly mapError: ((arg: any) => unknown)[];
   readonly mappers: ((res: any, arg: any) => unknown)[];
-  readonly errorMappers: ((error: any, arg: any) => unknown)[];
   readonly method?: HttpMethod;
   readonly parseJson?: (arg: unknown) => unknown;
   readonly parseResponse?: (res: Response, arg: any) => unknown;
-  readonly baseUrl?: URL;
+  readonly parseText?: (body: string, arg: unknown) => unknown;
 }
 
 export class TypicalWrappedError extends Error {

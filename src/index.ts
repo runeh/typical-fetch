@@ -154,6 +154,7 @@ class CallBuilder<
       errorMappers,
       parseJson,
       parseResponse,
+      parseText,
     } = this.record;
 
     invariant(getPath != null, 'No path set');
@@ -188,6 +189,8 @@ class CallBuilder<
 
         if (parseResponse) {
           data = await parseResponse(res, args);
+        } else if (parseText) {
+          // fixme: this is dead code for now
         } else if (parseJson) {
           // fixme: this is dead code for now
           const text = await res.text();
