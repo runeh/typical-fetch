@@ -683,15 +683,15 @@ describe('call builder', () => {
       expect(() => buildCall().body('foo').body('bar')).toThrow();
     });
 
-    it('rejects when missing path', async () => {
+    it('throws when missing path', async () => {
       expect(() => buildCall().build()).toThrow();
     });
 
-    it('rejects when missing method', async () => {
+    it('throws when missing method', async () => {
       expect(() => buildCall().path('/').build()).toThrow();
     });
 
-    it('rejects when using body with bodyless method', async () => {
+    it('throws when using body with bodyless method', async () => {
       expect(() =>
         buildCall().path('/').method('head').body('test').build(),
       ).toThrow();
@@ -702,6 +702,80 @@ describe('call builder', () => {
 
       expect(() =>
         buildCall().path('/').method('delete').body('test').build(),
+      ).toThrow();
+    });
+
+    it('throws when trying to add multiple parsers', async () => {
+      expect(() =>
+        buildCall()
+          .path('/')
+          .method('get')
+          .parseText((e) => e)
+          .parseText((e) => e),
+      ).toThrow();
+
+      expect(() =>
+        buildCall()
+          .path('/')
+          .method('get')
+          .parseText((e) => e)
+          .parseJson((e) => e),
+      ).toThrow();
+
+      expect(() =>
+        buildCall()
+          .path('/')
+          .method('get')
+          .parseText((e) => e)
+          .parseResponse((e) => e),
+      ).toThrow();
+
+      expect(() =>
+        buildCall()
+          .path('/')
+          .method('get')
+          .parseJson((e) => e)
+          .parseJson((e) => e),
+      ).toThrow();
+
+      expect(() =>
+        buildCall()
+          .path('/')
+          .method('get')
+          .parseJson((e) => e)
+          .parseText((e) => e),
+      ).toThrow();
+
+      expect(() =>
+        buildCall()
+          .path('/')
+          .method('get')
+          .parseJson((e) => e)
+          .parseResponse((e) => e),
+      ).toThrow();
+
+      expect(() =>
+        buildCall()
+          .path('/')
+          .method('get')
+          .parseResponse((e) => e)
+          .parseResponse((e) => e),
+      ).toThrow();
+
+      expect(() =>
+        buildCall()
+          .path('/')
+          .method('get')
+          .parseResponse((e) => e)
+          .parseJson((e) => e),
+      ).toThrow();
+
+      expect(() =>
+        buildCall()
+          .path('/')
+          .method('get')
+          .parseResponse((e) => e)
+          .parseText((e) => e),
       ).toThrow();
     });
   });

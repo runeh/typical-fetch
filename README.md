@@ -125,15 +125,10 @@ type FetchUsersCall = (args: {
 
 ### todo
 
-- arg thingy! to record?
-
-- sanity check parser. Choke if a parser is registered already
-- error if both parse and parseBody
+- arg thingy to record?
 - pass response to mappers? That seems good if you need to know redirect url or
-  some header or whatever
+  some header or whatever. Or should people be using parseResponse in that case?
 - `.baseUrl(` should support function
-- can parseJson just add two parsers? one for text->unknown and then the user
-  provided one?
 - Add kitchen sink tests
 - follow redirects?
 - test for redirect stuff
@@ -141,7 +136,6 @@ type FetchUsersCall = (args: {
 - figure out good way of dealing with http errors / other
 - Return status somehow?
 - Helpers for isWrappedError etc?
-- have a parseRaw thingy that passes response object?
 - Add response object to the result?
 - test for file uploads
 - interceptor / event handlers?
@@ -149,8 +143,6 @@ type FetchUsersCall = (args: {
 - test for throwing in weird places
 - Have more custom errors? like at least JSON parsing at least?
 - should path default to `/` ?
-- probably special case json / text parsing. So we can call .text() and return
-  it in cases where something throws?
 
 #### maybe
 

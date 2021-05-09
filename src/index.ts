@@ -123,18 +123,57 @@ class CallBuilder<
   parseJson<T>(
     parser: (data: unknown, args: Arg) => T,
   ): CallBuilder<T, Arg, Err> {
+    invariant(
+      this.record.parseJson == null,
+      'A json parser is already registered',
+    );
+    invariant(
+      this.record.parseText == null,
+      'A text parser is already registered',
+    );
+    invariant(
+      this.record.parseResponse == null,
+      'A response parser is already registered',
+    );
+
     return new CallBuilder({ ...this.record, parseJson: parser });
   }
 
   parseText<T>(
     parser: (data: string, args: Arg) => T,
   ): CallBuilder<T, Arg, Err> {
+    invariant(
+      this.record.parseJson == null,
+      'A json parser is already registered',
+    );
+    invariant(
+      this.record.parseText == null,
+      'A text parser is already registered',
+    );
+    invariant(
+      this.record.parseResponse == null,
+      'A response parser is already registered',
+    );
+
     return new CallBuilder({ ...this.record, parseText: parser });
   }
 
   parseResponse<T>(
     parser: (res: Response, args: Arg) => Promise<T> | T,
   ): CallBuilder<T, Arg, Err> {
+    invariant(
+      this.record.parseJson == null,
+      'A json parser is already registered',
+    );
+    invariant(
+      this.record.parseText == null,
+      'A text parser is already registered',
+    );
+    invariant(
+      this.record.parseResponse == null,
+      'A response parser is already registered',
+    );
+
     return new CallBuilder<T, Arg, Err>({
       ...this.record,
       parseResponse: parser,
