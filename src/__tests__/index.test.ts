@@ -175,7 +175,6 @@ describe('call builder', () => {
         .build();
 
       const res = await fetcher({ baseUrl });
-      console.log(res);
       expect(res.success);
       expect(res.body).toEqual(204);
       expect(scope.isDone()).toEqual(true);
@@ -720,8 +719,23 @@ describe('call builder', () => {
       expect(scope.isDone()).toEqual(true);
     });
 
+    it('buffer', async () => {
+      const scope = nock(baseUrl) //
+        .post('/boop', 'test')
+        .reply(200);
+
+      const fetcher = buildCall()
+        .path('/boop')
+        .method('post')
+        .body(Buffer.from('test'))
+        .build();
+
+      const res = await fetcher({ baseUrl });
+
+      expect(scope.isDone()).toEqual(true);
+    });
+
     it.todo('stream test');
-    it.todo('buffer');
   });
 
   describe('errors during call definition', () => {

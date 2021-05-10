@@ -13,7 +13,7 @@ export function getBodyInfo(
   } else if (typeof data === 'string') {
     return { body: data, contentType: 'text/plain' };
   } else if (
-    data instanceof ArrayBuffer ||
+    Buffer.isBuffer(data) ||
     data instanceof Readable ||
     data instanceof URLSearchParams ||
     data instanceof FormData
