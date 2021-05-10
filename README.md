@@ -266,7 +266,10 @@ the server. The errors are not thrown, but returned as the `error` value on the
 that is likely more specific.
 
 ```typescript
-const fetcher = buildCall().method('get').path('/error').build();
+const fetcher = buildCall() //
+  .method('get')
+  .path('/error')
+  .build();
 
 const result = await fetcher({ baseUrl: 'https://example.org/api' });
 
@@ -278,7 +281,8 @@ if (result.success === false) {
   } else if (error instanceof TypicalWrappedError) {
     console.log(`Got an error: ${error.wrapped}`);
   } else {
-    // this can never happen!
+    // this can never happen! The instanceof checks exhaustively checks the
+    // errors that are returned from the call
   }
 }
 ```
