@@ -34,9 +34,9 @@ class CallBuilder<
   }
 
   /**
-   * Add a type for the argument to the built call by passing it as a generic,
-   * such as `builder.args<{name: string}>()`. Can be called multiple times,
-   * the resulting type will be the intersecton of all the arguments.
+   * Add a type for the argument required by the fetcher by passing it as a
+   * generic, such as `builder.args<{name: string}>()`. Can be called multiple
+   * times, the resulting type will be the intersecton of all the arguments.
    */
   args<T extends Record<string, unknown>>(): CallBuilder<
     Ret,
@@ -47,13 +47,17 @@ class CallBuilder<
   }
 
   /**
-   * Set the HTTP method of the request being defined.
+   * Set the HTTP method of the fetcher.
    */
   method(method: HttpMethod): CallBuilder<Ret, Arg, Err> {
     invariant(this.record.method == null, "Can't set method multiple times");
     return new CallBuilder({ ...this.record, method });
   }
 
+  /**
+   * Set the base URL for the fetcher. If this method is called, the `baseUrl`
+   * argument is removed from the fetcher.
+   */
   baseUrl(url: string | URL): CallBuilder<Ret, Omit<Arg, 'baseUrl'>, Err> {
     const baseUrl = new URL('', url);
     return new CallBuilder<Ret, Omit<Arg, 'baseUrl'>, Err>({
@@ -62,6 +66,10 @@ class CallBuilder<
     });
   }
 
+  /**
+   * Options to this method is passed on to the underlying `fetch` call. Note,
+   * only the `redirect` method is supported.
+   */
   fetchOptions(opts: TypicalRequestInit): CallBuilder<Ret, Arg, Err> {
     return new CallBuilder({
       ...this.record,
@@ -69,6 +77,10 @@ class CallBuilder<
     });
   }
 
+  /**
+   * Set the path the fetcher will send requests to. The path is joined with
+   * the base URL.
+   */
   path(path: string): this;
   path(getPath: (args: Arg) => string): this;
   path(pathOrFun: string | ((args: Arg) => string)) {
@@ -79,6 +91,10 @@ class CallBuilder<
     return new CallBuilder<Ret, Arg, Err>({ ...this.record, getPath });
   }
 
+  /**
+   * Add query arguments the fetcher will use when making HTTP requests. This
+   * method can be called multiple times, to add more parameters.
+   */
   query(headers: QueryParam): CallBuilder<Ret, Arg, Err>;
   query(fun: (args: Arg) => QueryParam): CallBuilder<Ret, Arg, Err>;
   query(funOrQuery: QueryParam | ((args: Arg) => QueryParam)) {
@@ -91,6 +107,10 @@ class CallBuilder<
     });
   }
 
+  /**
+   * Add headers the fetcher will use when making HTTP requests. This
+   * method can be called multiple times, to add more headers.
+   */
   headers(headers: HeadersInit): CallBuilder<Ret, Arg, Err>;
   headers(fun: (args: Arg) => HeadersInit): CallBuilder<Ret, Arg, Err>;
   headers(
@@ -105,6 +125,10 @@ class CallBuilder<
     });
   }
 
+  /**
+   * Transform the returned data. This method can be called multiple times. Each
+   * map function will receive the result of the previous mapper.
+   */
   map<T>(mapper: (data: Ret, args: Arg) => T): CallBuilder<T, Arg, Err> {
     return new CallBuilder<T, Arg, Err>({
       ...this.record,
@@ -112,6 +136,11 @@ class CallBuilder<
     });
   }
 
+  /**
+   * Transform errors raised when the fetcher is called. This method can be
+   * called multiple times. Each map function will receive the result of the
+   * previous mapper.
+   */
   mapError<T>(mapper: (error: Err, args: Arg) => T): CallBuilder<Ret, Arg, T> {
     return new CallBuilder<Ret, Arg, T>({
       ...this.record,
@@ -119,6 +148,9 @@ class CallBuilder<
     });
   }
 
+  /**
+   * Add data the fetcher will send when making http requests.
+   */
   body(data: BodyType): this;
   body(fun: (args: Arg) => BodyType): this;
   body(funOrData: ((args: Arg) => BodyType) | BodyType) {
@@ -128,6 +160,9 @@ class CallBuilder<
     return new CallBuilder<Ret, Arg, Err>({ ...this.record, getBody });
   }
 
+  /**
+   * The passed in function will be called with the response data as JSON.
+   */
   parseJson<T>(
     parser: (data: unknown, args: Arg) => T,
   ): CallBuilder<T, Arg, Err> {
@@ -147,6 +182,9 @@ class CallBuilder<
     return new CallBuilder({ ...this.record, parseJson: parser });
   }
 
+  /**
+   * The passed in function will be called with the response data as text.
+   */
   parseText<T>(
     parser: (data: string, args: Arg) => T,
   ): CallBuilder<T, Arg, Err> {
@@ -166,6 +204,9 @@ class CallBuilder<
     return new CallBuilder({ ...this.record, parseText: parser });
   }
 
+  /**
+   * The passed in function will be called with the response object.
+   */
   parseResponse<T>(
     parser: (res: Response, args: Arg) => Promise<T> | T,
   ): CallBuilder<T, Arg, Err> {
@@ -188,6 +229,9 @@ class CallBuilder<
     });
   }
 
+  /**
+   * Create the fetcher function.
+   */
   build(): BuiltCall<Ret, Arg, Err> {
     const {
       getBody,
