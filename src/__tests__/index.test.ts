@@ -1,10 +1,12 @@
 import { URL, URLSearchParams } from 'url';
+import { resolve } from 'path';
 import FormData from 'form-data';
 import nock from 'nock';
 import { Headers } from 'node-fetch';
 import { buildCall } from '../index';
 import { buildUrl, unwrapError } from '../common';
 import invariant from 'ts-invariant';
+import { createReadStream } from 'fs';
 
 const baseUrl = 'http://www.example.org';
 
@@ -782,6 +784,27 @@ describe('call builder', () => {
       expect(scope.isDone()).toEqual(true);
     });
 
+    it('FormData file', async () => {
+      const scope = nock(baseUrl)
+        .post('/boop', /.*form-data.*/) // fixme: too naive
+        .matchHeader('content-type', /multipart\/form-data;.*/)
+        .reply(200);
+
+      const pth = resolve(__dirname, '../../README.md');
+
+      const formData = new FormData();
+      formData.append('my_file', createReadStream(pth));
+
+      const fetcher = buildCall()
+        .path('/boop')
+        .method('post')
+        .body(formData)
+        .build();
+
+      const res = await fetcher({ baseUrl });
+      expect(scope.isDone()).toEqual(true);
+    });
+
     it('buffer', async () => {
       const scope = nock(baseUrl) //
         .post('/boop', 'test')
@@ -793,12 +816,29 @@ describe('call builder', () => {
         .body(Buffer.from('test'))
         .build();
 
-      const res = await fetcher({ baseUrl });
+      await fetcher({ baseUrl });
 
       expect(scope.isDone()).toEqual(true);
     });
 
-    it.todo('stream test');
+    it('stream', async () => {
+      const pth = resolve(__dirname, '../../README.md');
+      const stream = createReadStream(pth);
+
+      const scope = nock(baseUrl) //
+        .post('/boop', /^# typical-fetch.*/)
+        .reply(200);
+
+      const fetcher = buildCall()
+        .path('/boop')
+        .method('post')
+        .body(stream)
+        .build();
+
+      await fetcher({ baseUrl });
+
+      expect(scope.isDone()).toEqual(true);
+    });
   });
 
   describe('errors during call definition', () => {

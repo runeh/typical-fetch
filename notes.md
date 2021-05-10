@@ -2,8 +2,6 @@
 
 ## todo
 
-- pass response to mappers? That seems good if you need to know redirect url or
-  some header or whatever. Or should people be using parseResponse in that case?
 - Add kitchen sink tests
 - test for redirect stuff
 - jsdoc
@@ -11,23 +9,21 @@
 - Return status somehow?
 - Helpers for isWrappedError etc?
 - Add response object to the result?
-- test for file uploads
 - interceptor / event handlers?
 - clean up where error handling happens
 - test for throwing in weird places
 - Have more custom errors? like at least JSON parsing at least?
-- should path default to `/` ?
 - example wrapper for people that prefer throwing
 - docs
 - add response text if available to error
-- should there be a `fetchInit` method if you need to pass extra fetch stuff?
-  Useful for `redirect`, `mode` and `credentials`.
-- if you want text out of a response, you need to do `parseText(e => e)` which
-  is a bit lame..
 - tests for text/response in error object
 
 ## maybe
 
+- More stuff supported in `fetchOptions`
+- if you want text out of a response, you need to do `parseText(e => e)` which
+  is a bit lame..
+- should path default to `/` ?
 - `.baseUrl(` should support function ?
 - Wrap response in a proxy that throws if you try to edit/call it?
 - Narrow after calling `method` and `path`?
