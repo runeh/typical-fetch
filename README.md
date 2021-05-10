@@ -24,7 +24,10 @@ Generate function that sends a `GET` result to the `/ping/` path of the base url
 passed in to the function. In this case `https://example.org/api/ping`.
 
 ```typescript
-const fetcher = buildCall().method('get').path('/ping').build();
+const fetcher = buildCall() //
+  .method('get')
+  .path('/ping')
+  .build();
 
 await getRequest({ baseUrl: 'https://example.org/api' });
 ```
