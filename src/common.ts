@@ -77,7 +77,6 @@ export function getFetchParams(
   const { body, contentType } = getBodyInfo(rawBody);
 
   if (contentType) {
-    // fixme: might need more headers for some types?
     headers.set('content-type', contentType);
   }
 

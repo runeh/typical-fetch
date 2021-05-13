@@ -16,12 +16,12 @@ import {
 
 export { unwrapError } from './common';
 
-class CallBuilder<
+export class CallBuilder<
   Ret = void,
   Arg extends Record<string, any> = { baseUrl: string | URL },
   Err = TypicalWrappedError | TypicalHttpError
 > {
-  record: CallRecord;
+  private record: CallRecord;
 
   constructor(record?: CallRecord) {
     this.record = record ?? {
@@ -95,7 +95,7 @@ class CallBuilder<
    * Add query arguments the fetcher will use when making HTTP requests. This
    * method can be called multiple times, to add more parameters.
    */
-  query(headers: QueryParam): CallBuilder<Ret, Arg, Err>;
+  query(params: QueryParam): CallBuilder<Ret, Arg, Err>;
   query(fun: (args: Arg) => QueryParam): CallBuilder<Ret, Arg, Err>;
   query(funOrQuery: QueryParam | ((args: Arg) => QueryParam)) {
     const getQueryFun =
@@ -289,8 +289,6 @@ class CallBuilder<
           const parsed = parseJson(json, args);
           data = parsed;
         } else {
-          // fixme: might be binary or text or whatevs
-          // const text = await res.text();
           data = undefined;
         }
 
@@ -300,7 +298,6 @@ class CallBuilder<
 
         return { success: true, body: data, error: undefined };
       } catch (error: unknown) {
-        // fixme: here goes error mappers stuff.
         return {
           success: false,
           body: undefined,

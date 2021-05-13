@@ -4,12 +4,8 @@
 
 - Add kitchen sink tests
 - test for redirect stuff
-- jsdoc
-- figure out good way of dealing with http errors / other
-- Return status somehow?
 - Helpers for isWrappedError etc?
 - Add response object to the result?
-- interceptor / event handlers?
 - clean up where error handling happens
 - test for throwing in weird places
 - Have more custom errors? like at least JSON parsing at least?
@@ -20,6 +16,7 @@
 
 ## maybe
 
+- interceptor / event handlers?
 - More stuff supported in `fetchOptions`
 - if you want text out of a response, you need to do `parseText(e => e)` which
   is a bit lame..

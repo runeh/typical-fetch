@@ -14,8 +14,6 @@ Principles:
 
 ## API
 
-todo
-
 ## Examples
 
 ### Basic
