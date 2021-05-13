@@ -3,8 +3,8 @@ import { URL, URLSearchParams } from 'url';
 import {
   HeadersInit,
   BodyInit as OriginalBodyInit,
-  Response,
   RequestInit,
+  Response,
 } from 'node-fetch';
 
 export type CallReturn<Ret, Err> =
@@ -20,7 +20,7 @@ export type CallReturn<Ret, Err> =
  * empty object, `Record<string, never>`.
  * Otherwise, the function takes Arg as a single argument
  */
-export type BuiltCall<Ret, Arg, Err> = [Arg] extends [never]
+export type FetchCall<Ret, Arg, Err> = [Arg] extends [never]
   ? () => Promise<CallReturn<Ret, Err>>
   : Arg extends Record<string, never>
   ? () => Promise<CallReturn<Ret, Err>>

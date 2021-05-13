@@ -4,8 +4,8 @@ import { invariant } from 'ts-invariant';
 import { applyErrorMappers, getFetchParams } from './common';
 import {
   BodyType,
-  BuiltCall,
   CallRecord,
+  FetchCall,
   HttpMethod,
   MergedArgs,
   QueryParam,
@@ -232,7 +232,7 @@ export class CallBuilder<
   /**
    * Create the fetcher function.
    */
-  build(): BuiltCall<Ret, Arg, Err> {
+  build(): FetchCall<Ret, Arg, Err> {
     const {
       getBody,
       getPath,
