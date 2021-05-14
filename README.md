@@ -2,9 +2,8 @@
 
 Toolkit for creating strongly typed HTTP calls.
 
-`typical-fetch` lets users generate fetcher functions that perform HTTP calls.
-This is useful when hand-crafting HTTP API clients, and code generators that
-emit API client code.
+`typical-fetch` generates functions that wrap HTTP calls and make sure responses
+and errors are strictly typed.
 
 Principles:
 
