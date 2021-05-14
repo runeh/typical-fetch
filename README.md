@@ -210,49 +210,6 @@ if (result.success) {
 }
 ```
 
-### Use base builder to create multiple calls
-
-Generate two different functions, one for a `GET` and one for a `POST` that
-share a lot of setup code by building off a common builder.
-
-```typescript
-const baseBuilder = buildCall()
-  .args<{ apiToken: string }>()
-  .baseUrl('https://example.org/api')
-  .headers((args) => ({
-    'user-agent': 'typical-fetch',
-    authorizaton: `Bearer ${args.apiToken}`,
-  }));
-
-const getUser = baseBuilder
-  .args<{ id: string }>()
-  .method('get')
-  .path((args) => `/user/${args.id}`)
-  .parseJson((data) => {
-    return parseUsers(data);
-  })
-  .build();
-
-const createUser = baseBuilder
-  .args<{ name: string; birthDate: string }>()
-  .method('post')
-  .path('/user')
-  .body((args) => {
-    return { name: args.name, birthDate: args.birthDate };
-  })
-  .parseJson((data) => parseUser(data))
-  .build();
-
-const createResult = await createUser({
-  apiToken: 'asdf',
-  name: 'Rune',
-  birthDate: '1975-05-24',
-});
-
-// Normally we would should check for errors on the result
-const userId = createResult.body.id;
-```
-
 ### Handle errors
 
 Generate a function that sends a `GET` request that gets an error response from
@@ -308,6 +265,56 @@ const result = await fetcher({ baseUrl: 'https://example.org/api' });
 if (result.success === false) {
   console.log(result.error);
 }
+```
+
+### Use base builder to create multiple calls
+
+Generate two different functions, one for a `GET` and one for a `POST` that
+share a lot of setup code by building off a common builder.
+
+```typescript
+const baseBuilder = buildCall()
+  .args<{ apiToken: string }>()
+  .baseUrl('https://example.org/api')
+  .headers((args) => ({
+    'user-agent': 'typical-fetch',
+    authorizaton: `Bearer ${args.apiToken}`,
+  }))
+  .mapError((error) => {
+    if (error instanceof TypicalHttpError && error.status === 401) {
+      return new NotAuthorizedError();
+    } else {
+      return error;
+    }
+  });
+
+const getUser = baseBuilder
+  .args<{ id: string }>()
+  .method('get')
+  .path((args) => `/user/${args.id}`)
+  .parseJson((data) => {
+    return parseUsers(data);
+  })
+  .build();
+
+const createUser = baseBuilder
+  .args<{ name: string; birthDate: string }>()
+  .method('post')
+  .path('/user')
+  .body((args) => {
+    return { name: args.name, birthDate: args.birthDate };
+  })
+  .parseJson((data) => parseUser(data))
+  .build();
+
+const createResult = await createUser({
+  apiToken: 'asdf',
+  name: 'Rune',
+  birthDate: '1975-05-24',
+});
+
+// Normally we would should check for errors on the result
+const userId = createResult.body.id;
 ```
 
 ## API
@@ -492,9 +499,9 @@ const fetcher3 = buildCall() //
 const result3 = await fetcher3({ baseUrl: 'https://example.org', id: '1' });
 ```
 
-### `.header`
+### `.headers`
 
-The `header` method adds headers to the request that will be sent by the
+The `headers` method adds headers to the request that will be sent by the
 fetcher.
 
 The argument can be either a `Header` object, an object of key/values or and
@@ -502,7 +509,235 @@ array of `[key value]` tuples. The argument can also be a function that returns
 one of those types. The function will receive all arguments defined via `.args`
 calls.
 
-The `header` method can be called multiple times. The headers from all the calls
-will be sent.
+The `headers` method can be called multiple times. The headers from all the
+calls will be sent.
 
-###
+fixme: examples
+
+### `.body`
+
+Sets a body to send.
+
+The argument can be a `string`, `Buffer`, `Readable`, `URLSearchParams`,
+`FormData`, or a JSON object. The argument can also be a function that returns
+one of those types. The function will receive all arguments defined via `.args`
+calls.
+
+If the object is JSON, it will be serialized and the appropriate header for JSON
+is set.
+
+If the object is a `FormData` or `URLSearchParams` object, the appropriate
+headers for posting a form will be set.
+
+For other types of data, that require content type headers or similar, the user
+must set them explicitly.
+
+The `.body` method is not required. It can only be called once.
+
+```typescript
+const fetcher1 = buildCall() //
+  .method('post')
+  .path('/post')
+  .body({ id: '1234', name: 'Rune' })
+  .build();
+
+const result1 = await withBaseUrl({ baseUrl: 'https://httpbin.org' });
+
+const fetcher2 = buildCall() //
+  .method('post')
+  .path('/post')
+  .body(fs.createReadStream(somePdfFilePath))
+  .headers({ 'content-type': 'application/pdf' })
+  .build();
+
+const result2 = await withBaseUrl({ baseUrl: 'https://httpbin.org' });
+
+const fetcher3 = buildCall() //
+  .method('post')
+  .path('/post')
+  .body('id,name\n1,Rune')
+  .headers({ 'content-type': 'text/csv' })
+  .build();
+
+const result3 = await withBaseUrl({ baseUrl: 'https://httpbin.org' });
+
+const fetcher4 = buildCall() //
+  .args<{ uploadPath: string; ownerId: string }>()
+  .method('post')
+  .path('/post')
+  .body((args) => {
+    const formData = new FormData();
+    const stream = fs.createReadStream(args.uploadPath);
+    const filename = path.basename(args.uploadPath);
+    formData.append('file', stream, filename);
+    formData.append('owner', args.ownerId);
+    return formData;
+  })
+  .build();
+
+const result4 = await withBaseUrl({
+  baseUrl: 'https://httpbin.org',
+  uploadPath: '/tmp/receipt.pdf',
+  ownerId: '1',
+});
+```
+
+### `.parseJson`
+
+Adds a function that will parse JSON received from the request. The return type
+of this call becomes the return type of the fetcher call.
+
+The parser function receives two arguments. The raw JSON and any arguments
+defined via `.args` calls.
+
+This function is usually used to take untyped data, the raw JSON, and return
+something that has been validated.
+
+The `.parseJson` method at most be called once.
+
+```typescript
+const fetcher1 = buildCall() //
+  .method('get')
+  .path('/json')
+  .parseJson((rawJson) => {
+    // This would normally do real validation of the raw json.
+    return rawJson as string[];
+  })
+  .build();
+
+const result1 = await withBaseUrl({ baseUrl: 'https://httpbin.org' });
+if (result1.success) {
+  // this is the return value from the parseJson call:
+  console.log(result1.data);
+}
+```
+
+### `.parseText`
+
+Adds a function that will parse text received from the request. The return type
+of this call becomes the return type of the fetcher call.
+
+The parser function receives two arguments. The raw text and any arguments
+defined via `.args` calls.
+
+This function is usually used to take untyped data, the raw text, and return
+something that has been validated.
+
+The `.parseText` method at most be called once.
+
+```typescript
+const fetcher1 = buildCall() //
+  .method('get')
+  .path('/json')
+  .parseText((rawText) => {
+    // assuming we received some lines of semi-colon separated data:
+    return rawText //
+      .split('\n')
+      .map((line) => line.split(';'));
+  })
+  .build();
+
+const result1 = await withBaseUrl({ baseUrl: 'https://httpbin.org' });
+if (result1.success) {
+  // this is the return value from the parseText call:
+  console.log(result1.data);
+}
+```
+
+### `.parseResponse`
+
+Adds a function that will parse the response object received from the request.
+The return type of this call becomes the return type of the fetcher call.
+
+The parser function receives two arguments. The response object and any
+arguments defined via `.args` calls.
+
+This function is usually used to parse responses where there content you're
+interested in is not in the body. For example if a header contains the data you
+need.
+
+The `.parseResponse ` method at most be called once.
+
+```typescript
+const fetcher1 = buildCall() //
+  .method('get')
+  .path('/json')
+  .parseResponse((response) => {
+    return response.headers['Cookie'];
+  })
+  .build();
+
+const result1 = await withBaseUrl({ baseUrl: 'https://httpbin.org' });
+if (result1.success) {
+  // this is the return value from the parseResponse call:
+  console.log(result1.data);
+}
+```
+
+### `.map`
+
+`map` transforms a result in some way. It takes the current return type of the
+fetcher, for example what a `parseJson` call returns, and transforms it. The
+return type of `map` becomes the new return type of the fetcher.
+
+There can be multiple map calls. Each receives the output of the previous one as
+its input.
+
+```typescript
+const fetcher1 = buildCall() //
+  .method('get')
+  .path('/visitorCount')
+  // return the text from the response unchanged
+  .parseText((text) => text)
+  // convert the text to a number
+  .map((text) => parseFloat(text))
+  // convert the number to a string of a fixed precision
+  .map((num) => num.toFixed(3))
+  .build();
+
+const result1 = await withBaseUrl({ baseUrl: 'https://httpbin.org' });
+if (result1.success) {
+  // this is the return value from the last map call:
+  console.log(result1.data);
+}
+```
+
+### `.mapError`
+
+A `mapError` function transforms exceptions. By default, all exceptions that
+occur when a fetcher is called is transformed into a `TypicalHttpError` or a
+`TypicalWrappedError`. The wrapped error type wraps all non-http errors that may
+occur during execution.
+
+The error mapper may convert any of these errors to more specific errors.
+
+There can be multiple error mappers. The result of the previous error mapper is
+passed as the error to the next error mapper.
+
+```typescript
+const fetcher1 = buildCall() //
+  .method('get')
+  .path('/ping')
+  .mapError((error) => {
+    if (error instanceof TypicalHttpError) {
+      if (error.status === 404) {
+        // some custom 404 error in your app
+        return new NotFoundError();
+      } else if (error.status === 401) {
+        return new AuthenticationError();
+      }
+    }
+    return error;
+  })
+  .build();
+
+const result1 = await withBaseUrl({ baseUrl: 'https://httpbin.org' });
+if (!result1.success) {
+  // this is the return value from the mapError call:
+  console.log(result1.error);
+}
+```
+
+### `.build`
+
+Returns the function defined by the builder.

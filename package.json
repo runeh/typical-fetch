@@ -9,7 +9,6 @@
     "lint": "eslint ./src --ext .ts,.tsx",
     "test": "jest --coverage src/**/*",
     "build": "tsc",
-    "run-examples": "ts-node-script examples/basics.ts",
     "prepare": "husky install"
   },
   "devDependencies": {
