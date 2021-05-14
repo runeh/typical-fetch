@@ -2,17 +2,15 @@
 
 Toolkit for creating strongly typed HTTP calls.
 
-`typical-fetch` lets users generate functions that perform HTTP calls. This is
-useful both when hand-crafting API clients, or for tools that generate API
-client code.
+`typical-fetch` lets users generate fetcher functions that perform HTTP calls.
+This is useful when hand-crafting HTTP API clients, and code generators that
+emit API client code.
 
 Principles:
 
-- All inputs and outputs should be strongly typed by default
+- All inputs and outputs are strongly typed by default
 - Errors are treated as return values, not by throwing, so they can be
   exhaustively checked.
-
-## API
 
 ## Examples
 
@@ -311,3 +309,200 @@ if (result.success === false) {
   console.log(result.error);
 }
 ```
+
+## API
+
+Create a fetcher by calling `buildCall()`. `buildCall` returns an instance of
+`CallBuilder` that you can chain calls on. You can also use `new CallBuilder()`
+rather than `buildCall` if you prefer.
+
+The `CallBuilder` class has methods to control how the produced function should
+work. At the end of the chain, call `.build()` to produce the fetcher function.
+
+So for example:
+
+```typescript
+const sendPing = buildCall()
+  .baseUrl('https://httpbin.org')
+  .method('head')
+  .path('/head')
+  .build();
+
+await sendPing();
+```
+
+### `.baseUrl`
+
+`baseUrl` sets the base url used when making requests. The argument must be
+either a string or a URL object. The base url is joined with the `path`
+argument.
+
+The base url is optional. If not used, then `baseUrl` will be an argument on the
+fetcher function:
+
+```typescript
+const fetcher1 = buildCall()
+  .baseUrl('https://httpbin.org')
+  .method('get')
+  .path('/get')
+  .build();
+
+const result1 = await withBaseUrl();
+
+const fetcher2 = buildCall() //
+  .method('get')
+  .path('/get')
+  .build();
+
+const result2 = await withBaseUrl({ baseUrl: 'https://httpbin.org' });
+```
+
+### `.args`
+
+The `args` method lets you define arguments that are required when calling the
+fetcher function. The arguments will be available to callbacks in other builder
+methods. The syntax is slightly weird. You call a method on the builder with a
+generic type argument, but no value arguments:
+
+The generic must be an object with string keys, and arbitrary values.
+
+The `args` method can be called multiple times. The argument types will be
+combined into a single type.
+
+If `.baseUrl` is not called on the builder, then `baseUrl` will be an argument
+on the fetcher.
+
+```typescript
+const fetcher1 = buildCall() //
+  .args<{ id: string }>()
+  .method('post')
+  .path('/post')
+  .build();
+
+const result1 = await withBaseUrl({
+  baseUrl: 'https://httpbin.org',
+  id: 'test',
+});
+
+const fetcher2 = buildCall() //
+  .args<{ id: string; name: string }>()
+  .method('post')
+  .path('/post')
+  .args<{ overwrite: boolean }>()
+  .build();
+
+const result2 = await withBaseUrl({
+  baseUrl: 'https://httpbin.org',
+  id: 'test',
+  name: 'Rune',
+  overwrite: true,
+});
+```
+
+### `.method`
+
+The `method` method takes a single argument, which must be one of `delete`,
+`get`, `head`, `patch`, `post`, `put`. The fetcher function will use this method
+when making HTTP requests.
+
+The `method` method must be called before calling `build`.
+
+```typescript
+const fetcher = buildCall() //
+  .method('head')
+  .path('/')
+  .build();
+
+const result = fetcher({ baseUrl: 'https://httpbin.org' });
+```
+
+### `.path`
+
+The `path` method sets the path the fetcher will request from. The path is
+joined with the base URL. Thus, if the `baseUrl` is
+`https://example.org/dev-api` and the `path` is `/tags/article`, then the full
+URL of the request will be `https://example.org/dev-api/tags/article`.
+
+The argument to the `path` method is either a string, or a function that returns
+a string. The function will receive all arguments defined via `.args` calls.
+
+The `path` method must be called before calling `build`.
+
+```typescript
+const fetcher1 = buildCall() //
+  .method('get')
+  .path('/')
+  .build();
+
+const result1 = await fetcher1({ baseUrl: 'https://example.org' });
+
+const fetcher2 = buildCall() //
+  .args<{ id: string }>()
+  .method('get')
+  .path((args) => `/user/${args.id}`)
+  .build();
+
+// fetches https://example.org/user/1
+const result2 = await fetcher1({ baseUrl: 'https://example.org', id: '1' });
+```
+
+### `.query`
+
+The `query` method adds query parameters the the URL that will be called by the
+fetcher.
+
+The argument can be either an object of key/values, a `URLSearchParams` object,
+or a function returning one of those types. The function will receive all
+arguments defined via `.args` calls.
+
+The `query` method can be called multiple times. The query parameters from all
+the calls are joined together.
+
+```typescript
+const fetcher1 = buildCall() //
+  .method('get')
+  .path('/')
+  .query({ userId: '1' })
+  .build();
+
+// fetches https://example.org?userId=1
+const result1 = await fetcher1({ baseUrl: 'https://example.org' });
+
+const urlSearchParams = new URLSearchParams();
+
+urlSearchParams.add('articleId', '1');
+
+const fetcher2 = buildCall() //
+  .method('get')
+  .path('/')
+  .query(urlSearchParams)
+  .build();
+
+// fetches https://example.org?articleId=1
+const result2 = await fetcher2({ baseUrl: 'https://example.org' });
+
+const fetcher3 = buildCall() //
+  .args<{ id: string }>()
+  .method('get')
+  .path('/')
+  .query((args) => ({ id: args.id }))
+  .build();
+
+// fetches https://example.org?id=1
+const result3 = await fetcher3({ baseUrl: 'https://example.org', id: '1' });
+```
+
+### `.header`
+
+The `header` method adds headers to the request that will be sent by the
+fetcher.
+
+The argument can be either a `Header` object, an object of key/values or and
+array of `[key value]` tuples. The argument can also be a function that returns
+one of those types. The function will receive all arguments defined via `.args`
+calls.
+
+The `header` method can be called multiple times. The headers from all the calls
+will be sent.
+
+###
