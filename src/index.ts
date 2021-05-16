@@ -19,7 +19,7 @@ export { unwrapError } from './common';
 export class CallBuilder<
   Ret = void,
   Arg extends Record<string, any> = { baseUrl: string | URL },
-  Err = TypicalWrappedError | TypicalHttpError
+  Err = TypicalWrappedError | TypicalHttpError,
 > {
   private record: CallRecord;
 
@@ -81,9 +81,11 @@ export class CallBuilder<
    * Set the path the fetcher will send requests to. The path is joined with
    * the base URL.
    */
-  path(path: string): this;
-  path(getPath: (args: Arg) => string): this;
-  path(pathOrFun: string | ((args: Arg) => string)) {
+  path(path: string): CallBuilder<Ret, Arg, Err>;
+  path(getPath: (args: Arg) => string): CallBuilder<Ret, Arg, Err>;
+  path(
+    pathOrFun: string | ((args: Arg) => string),
+  ): CallBuilder<Ret, Arg, Err> {
     invariant(this.record.getPath == null, "Can't set path multiple times");
     const getPath =
       typeof pathOrFun === 'function' ? pathOrFun : () => pathOrFun;
@@ -97,7 +99,9 @@ export class CallBuilder<
    */
   query(params: QueryParam): CallBuilder<Ret, Arg, Err>;
   query(fun: (args: Arg) => QueryParam): CallBuilder<Ret, Arg, Err>;
-  query(funOrQuery: QueryParam | ((args: Arg) => QueryParam)) {
+  query(
+    funOrQuery: QueryParam | ((args: Arg) => QueryParam),
+  ): CallBuilder<Ret, Arg, Err> {
     const getQueryFun =
       typeof funOrQuery === 'function' ? funOrQuery : () => funOrQuery;
 
@@ -151,9 +155,11 @@ export class CallBuilder<
   /**
    * Add data the fetcher will send when making http requests.
    */
-  body(data: BodyType): this;
-  body(fun: (args: Arg) => BodyType): this;
-  body(funOrData: ((args: Arg) => BodyType) | BodyType) {
+  body(data: BodyType): CallBuilder<Ret, Arg, Err>;
+  body(fun: (args: Arg) => BodyType): CallBuilder<Ret, Arg, Err>;
+  body(
+    funOrData: ((args: Arg) => BodyType) | BodyType,
+  ): CallBuilder<Ret, Arg, Err> {
     invariant(this.record.getBody == null, "Can't set body multiple times");
     const getBody =
       typeof funOrData === 'function' ? funOrData : () => funOrData;

@@ -2,6 +2,9 @@
 
 ## todo
 
+- Pass in res to parsers so you can get both headers and body? Some openapi
+  things define headers in responses, for example for limit rating. Can/should
+  that be parsed out along with the data with the current methods?
 - Terminology: fetcher
 - pass body text and response to error mapper.
 - Signature for errors passed to error mapper is wrong? It can get other things

@@ -744,6 +744,24 @@ describe('call builder', () => {
       expect(scope.isDone()).toEqual(true);
     });
 
+    it('json from callback', async () => {
+      const scope = nock(baseUrl)
+        .post('/boop', { name: 'Rune' })
+        .matchHeader('content-type', 'application/json')
+        .reply(200);
+
+      const fetcher = buildCall()
+        .args<{ name: string }>()
+        .path('/boop')
+        .method('post')
+        .body((args) => ({ name: args.name }))
+        .build();
+
+      await fetcher({ baseUrl, name: 'Rune' });
+
+      expect(scope.isDone()).toEqual(true);
+    });
+
     it('URLSearchParams', async () => {
       const scope = nock(baseUrl)
         .post('/boop', 'name=Rune')
