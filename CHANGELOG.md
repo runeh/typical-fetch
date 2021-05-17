@@ -1,5 +1,12 @@
 # Changelog
 
+### [1.0.2](https://www.github.com/runeh/typical-fetch/compare/v1.0.1...v1.0.2) (2021-05-17)
+
+
+### Bug Fixes
+
+* include type dependencies ([f458b8f](https://www.github.com/runeh/typical-fetch/commit/f458b8fcb3d85173e21966207cd3ed9c140d7858))
+
 ### [1.0.1](https://www.github.com/runeh/typical-fetch/compare/v1.0.0...v1.0.1) (2021-05-17)
 
 
