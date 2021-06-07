@@ -1,5 +1,12 @@
 # Changelog
 
+### [1.0.3](https://www.github.com/runeh/typical-fetch/compare/v1.0.2...v1.0.3) (2021-06-07)
+
+
+### Bug Fixes
+
+* allow payloads on DELETE requests ([9b2e52b](https://www.github.com/runeh/typical-fetch/commit/9b2e52b2f9313e1d4dc61f1f1b5ed46ad246cd03))
+
 ### [1.0.2](https://www.github.com/runeh/typical-fetch/compare/v1.0.1...v1.0.2) (2021-05-17)
 
 
