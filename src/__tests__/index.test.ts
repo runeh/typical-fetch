@@ -915,14 +915,6 @@ describe('call builder', () => {
           .body('test')
           .build(),
       ).toThrow();
-
-      expect(() =>
-        buildCall() //
-          .path('/')
-          .method('delete')
-          .body('test')
-          .build(),
-      ).toThrow();
     });
 
     it('throws when trying to add multiple parsers', async () => {

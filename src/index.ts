@@ -253,7 +253,7 @@ export class CallBuilder<
 
     invariant(getPath != null, 'No path set');
     invariant(method != null, 'No method set');
-    if (getBody && ['head', 'get', 'delete'].includes(method)) {
+    if (getBody && ['head', 'get'].includes(method)) {
       throw new Error(`Can't include body in "${method}" request`);
     }
 
