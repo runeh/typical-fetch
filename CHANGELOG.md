@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://www.github.com/runeh/typical-fetch/compare/v1.0.3...v1.1.0) (2021-06-20)
+
+
+### Features
+
+* Add response object to TypicalHttpError ([#5](https://www.github.com/runeh/typical-fetch/issues/5)) ([72a1dd1](https://www.github.com/runeh/typical-fetch/commit/72a1dd16e1dfea8d9fd3f9dc6b38fa461aae5053))
+
 ### [1.0.3](https://www.github.com/runeh/typical-fetch/compare/v1.0.2...v1.0.3) (2021-06-07)
 
 
