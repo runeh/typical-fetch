@@ -274,7 +274,7 @@ export class CallBuilder<
             success: false,
             body: undefined,
             error: applyErrorMappers(
-              new TypicalHttpError(res.status),
+              new TypicalHttpError(res),
               errorMappers,
               args,
             ),

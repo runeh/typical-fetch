@@ -217,6 +217,11 @@ the server. The errors are not thrown, but returned as the `error` value on the
 `TypicalHttpError` or `TypicalWrappedError`. The latter wraps an inner exception
 that is likely more specific.
 
+The `TypicalHttpError` includes the `Response` object so consumers can extract
+more information from it as needed. The default error handing will not have
+called the `.text()` and `.json()`methods on the response, so these can bue used
+when parsing the error.
+
 ```typescript
 const fetcher = buildCall() //
   .method('get')
@@ -239,7 +244,7 @@ if (result.success === false) {
 }
 ```
 
-Generate a function that sends a `GET` request that gets an error response from
+Generates a function that sends a `GET` request that gets an error response from
 the server. The `mapError` function transforms the error objects into strings.
 Thus the `.error` value on the returned `result` object becomes a string, not an
 `error` object.
