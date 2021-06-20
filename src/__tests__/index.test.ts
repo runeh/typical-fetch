@@ -1213,5 +1213,33 @@ describe('buildUrl', () => {
 
       expect(scope.isDone()).toEqual(true);
     });
+
+    it('blargh', async () => {
+      const scope = nock(baseUrl) //
+        .get('/boop')
+        .reply(200, 'OK');
+
+      const fetcher = buildCall() //
+        .args<{ name: string }>()
+        .path((args) => `/boop/${args.name}`)
+
+        .argFun((boop: { e: string }) => {
+          return { foo: boop.e };
+        })
+
+        .argFun((adsf: { e: string }) => {
+          return { jarra: adsf.e };
+        })
+
+        .method('get')
+
+        .build();
+
+      const res = await fetcher({ baseUrl, name: 'asdf', e: 'adsf' });
+      expect(res.success).toEqual(true);
+      expect(res.body).toBeUndefined();
+
+      expect(scope.isDone()).toEqual(true);
+    });
   });
 });

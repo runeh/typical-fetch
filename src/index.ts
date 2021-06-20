@@ -18,7 +18,8 @@ export { unwrapError } from './common';
 
 export class CallBuilder<
   Ret = void,
-  Arg extends Record<string, any> = { baseUrl: string | URL },
+  InArg extends Record<string, any> = { baseUrl: string | URL },
+  MappedArg extends Record<string, any> = { baseUrl: string | URL },
   Err = TypicalWrappedError | TypicalHttpError,
 > {
   private record: CallRecord;
@@ -40,16 +41,24 @@ export class CallBuilder<
    */
   args<T extends Record<string, unknown>>(): CallBuilder<
     Ret,
-    MergedArgs<Arg, T>,
+    MergedArgs<InArg, T>,
+    MergedArgs<MappedArg, T>,
     Err
   > {
+    return new CallBuilder(this.record);
+  }
+
+  argFun<T, A>(
+    mapper: (input: T) => A,
+  ): CallBuilder<Ret, MergedArgs<InArg, T>, MergedArgs<MappedArg, A>, Err> {
+    console.log('mapper', mapper);
     return new CallBuilder(this.record);
   }
 
   /**
    * Set the HTTP method of the fetcher.
    */
-  method(method: HttpMethod): CallBuilder<Ret, Arg, Err> {
+  method(method: HttpMethod): CallBuilder<Ret, InArg, MappedArg, Err> {
     invariant(this.record.method == null, "Can't set method multiple times");
     return new CallBuilder({ ...this.record, method });
   }
@@ -58,9 +67,16 @@ export class CallBuilder<
    * Set the base URL for the fetcher. If this method is called, the `baseUrl`
    * argument is removed from the fetcher.
    */
-  baseUrl(url: string | URL): CallBuilder<Ret, Omit<Arg, 'baseUrl'>, Err> {
+  baseUrl(
+    url: string | URL,
+  ): CallBuilder<Ret, Omit<InArg, 'baseUrl'>, Omit<MappedArg, 'baseUrl'>, Err> {
     const baseUrl = new URL('', url);
-    return new CallBuilder<Ret, Omit<Arg, 'baseUrl'>, Err>({
+    return new CallBuilder<
+      Ret,
+      Omit<InArg, 'baseUrl'>,
+      Omit<MappedArg, 'baseUrl'>,
+      Err
+    >({
       ...this.record,
       baseUrl,
     });
@@ -70,7 +86,9 @@ export class CallBuilder<
    * Options to this method is passed on to the underlying `fetch` call. Note,
    * only the `redirect` method is supported.
    */
-  fetchOptions(opts: TypicalRequestInit): CallBuilder<Ret, Arg, Err> {
+  fetchOptions(
+    opts: TypicalRequestInit,
+  ): CallBuilder<Ret, InArg, MappedArg, Err> {
     return new CallBuilder({
       ...this.record,
       requestInit: { ...this.record.requestInit, ...opts },
@@ -81,31 +99,38 @@ export class CallBuilder<
    * Set the path the fetcher will send requests to. The path is joined with
    * the base URL.
    */
-  path(path: string): CallBuilder<Ret, Arg, Err>;
-  path(getPath: (args: Arg) => string): CallBuilder<Ret, Arg, Err>;
+  path(path: string): CallBuilder<Ret, InArg, MappedArg, Err>;
   path(
-    pathOrFun: string | ((args: Arg) => string),
-  ): CallBuilder<Ret, Arg, Err> {
+    getPath: (args: MappedArg) => string,
+  ): CallBuilder<Ret, InArg, MappedArg, Err>;
+  path(
+    pathOrFun: string | ((args: MappedArg) => string),
+  ): CallBuilder<Ret, InArg, MappedArg, Err> {
     invariant(this.record.getPath == null, "Can't set path multiple times");
     const getPath =
       typeof pathOrFun === 'function' ? pathOrFun : () => pathOrFun;
 
-    return new CallBuilder<Ret, Arg, Err>({ ...this.record, getPath });
+    return new CallBuilder<Ret, InArg, MappedArg, Err>({
+      ...this.record,
+      getPath,
+    });
   }
 
   /**
    * Add query arguments the fetcher will use when making HTTP requests. This
    * method can be called multiple times, to add more parameters.
    */
-  query(params: QueryParam): CallBuilder<Ret, Arg, Err>;
-  query(fun: (args: Arg) => QueryParam): CallBuilder<Ret, Arg, Err>;
+  query(params: QueryParam): CallBuilder<Ret, InArg, MappedArg, Err>;
   query(
-    funOrQuery: QueryParam | ((args: Arg) => QueryParam),
-  ): CallBuilder<Ret, Arg, Err> {
+    fun: (args: MappedArg) => QueryParam,
+  ): CallBuilder<Ret, InArg, MappedArg, Err>;
+  query(
+    funOrQuery: QueryParam | ((args: MappedArg) => QueryParam),
+  ): CallBuilder<Ret, InArg, MappedArg, Err> {
     const getQueryFun =
       typeof funOrQuery === 'function' ? funOrQuery : () => funOrQuery;
 
-    return new CallBuilder<Ret, Arg, Err>({
+    return new CallBuilder<Ret, InArg, MappedArg, Err>({
       ...this.record,
       getQuery: [...this.record.getQuery, getQueryFun],
     });
@@ -115,15 +140,17 @@ export class CallBuilder<
    * Add headers the fetcher will use when making HTTP requests. This
    * method can be called multiple times, to add more headers.
    */
-  headers(headers: HeadersInit): CallBuilder<Ret, Arg, Err>;
-  headers(fun: (args: Arg) => HeadersInit): CallBuilder<Ret, Arg, Err>;
+  headers(headers: HeadersInit): CallBuilder<Ret, InArg, MappedArg, Err>;
   headers(
-    funOrHeaders: HeadersInit | ((args: Arg) => HeadersInit),
-  ): CallBuilder<Ret, Arg, Err> {
+    fun: (args: MappedArg) => HeadersInit,
+  ): CallBuilder<Ret, InArg, MappedArg, Err>;
+  headers(
+    funOrHeaders: HeadersInit | ((args: MappedArg) => HeadersInit),
+  ): CallBuilder<Ret, InArg, MappedArg, Err> {
     const getHeadersFun =
       typeof funOrHeaders === 'function' ? funOrHeaders : () => funOrHeaders;
 
-    return new CallBuilder<Ret, Arg, Err>({
+    return new CallBuilder<Ret, InArg, MappedArg, Err>({
       ...this.record,
       getHeaders: [...this.record.getHeaders, getHeadersFun],
     });
@@ -133,8 +160,10 @@ export class CallBuilder<
    * Transform the returned data. This method can be called multiple times. Each
    * map function will receive the result of the previous mapper.
    */
-  map<T>(mapper: (data: Ret, args: Arg) => T): CallBuilder<T, Arg, Err> {
-    return new CallBuilder<T, Arg, Err>({
+  map<T>(
+    mapper: (data: Ret, args: MappedArg) => T,
+  ): CallBuilder<T, InArg, MappedArg, Err> {
+    return new CallBuilder<T, InArg, MappedArg, Err>({
       ...this.record,
       mappers: [...this.record.mappers, mapper],
     });
@@ -145,8 +174,10 @@ export class CallBuilder<
    * called multiple times. Each map function will receive the result of the
    * previous mapper.
    */
-  mapError<T>(mapper: (error: Err, args: Arg) => T): CallBuilder<Ret, Arg, T> {
-    return new CallBuilder<Ret, Arg, T>({
+  mapError<T>(
+    mapper: (error: Err, args: MappedArg) => T,
+  ): CallBuilder<Ret, InArg, MappedArg, T> {
+    return new CallBuilder<Ret, InArg, MappedArg, T>({
       ...this.record,
       errorMappers: [...this.record.errorMappers, mapper],
     });
@@ -155,23 +186,28 @@ export class CallBuilder<
   /**
    * Add data the fetcher will send when making http requests.
    */
-  body(data: BodyType): CallBuilder<Ret, Arg, Err>;
-  body(fun: (args: Arg) => BodyType): CallBuilder<Ret, Arg, Err>;
+  body(data: BodyType): CallBuilder<Ret, InArg, MappedArg, Err>;
   body(
-    funOrData: ((args: Arg) => BodyType) | BodyType,
-  ): CallBuilder<Ret, Arg, Err> {
+    fun: (args: MappedArg) => BodyType,
+  ): CallBuilder<Ret, InArg, MappedArg, Err>;
+  body(
+    funOrData: ((args: MappedArg) => BodyType) | BodyType,
+  ): CallBuilder<Ret, InArg, MappedArg, Err> {
     invariant(this.record.getBody == null, "Can't set body multiple times");
     const getBody =
       typeof funOrData === 'function' ? funOrData : () => funOrData;
-    return new CallBuilder<Ret, Arg, Err>({ ...this.record, getBody });
+    return new CallBuilder<Ret, InArg, MappedArg, Err>({
+      ...this.record,
+      getBody,
+    });
   }
 
   /**
    * The passed in function will be called with the response data as JSON.
    */
   parseJson<T>(
-    parser: (data: unknown, args: Arg) => T,
-  ): CallBuilder<T, Arg, Err> {
+    parser: (data: unknown, args: MappedArg) => T,
+  ): CallBuilder<T, InArg, MappedArg, Err> {
     invariant(
       this.record.parseJson == null,
       'A json parser is already registered',
@@ -192,8 +228,8 @@ export class CallBuilder<
    * The passed in function will be called with the response data as text.
    */
   parseText<T>(
-    parser: (data: string, args: Arg) => T,
-  ): CallBuilder<T, Arg, Err> {
+    parser: (data: string, args: MappedArg) => T,
+  ): CallBuilder<T, InArg, MappedArg, Err> {
     invariant(
       this.record.parseJson == null,
       'A json parser is already registered',
@@ -214,8 +250,8 @@ export class CallBuilder<
    * The passed in function will be called with the response object.
    */
   parseResponse<T>(
-    parser: (res: Response, args: Arg) => Promise<T> | T,
-  ): CallBuilder<T, Arg, Err> {
+    parser: (res: Response, args: MappedArg) => Promise<T> | T,
+  ): CallBuilder<T, InArg, MappedArg, Err> {
     invariant(
       this.record.parseJson == null,
       'A json parser is already registered',
@@ -229,7 +265,7 @@ export class CallBuilder<
       'A response parser is already registered',
     );
 
-    return new CallBuilder<T, Arg, Err>({
+    return new CallBuilder<T, InArg, MappedArg, Err>({
       ...this.record,
       parseResponse: parser,
     });
@@ -238,7 +274,7 @@ export class CallBuilder<
   /**
    * Create the fetcher function.
    */
-  build(): FetchCall<Ret, Arg, Err> {
+  build(): FetchCall<Ret, InArg, Err> {
     const {
       getBody,
       getPath,
@@ -257,7 +293,7 @@ export class CallBuilder<
       throw new Error(`Can't include body in "${method}" request`);
     }
 
-    const fun = async (args: Arg) => {
+    const fun = async (args: InArg) => {
       let res: Response | undefined = undefined;
       let text: string | undefined = undefined;
       const baseUrl = this.record.baseUrl ?? args.baseUrl;
