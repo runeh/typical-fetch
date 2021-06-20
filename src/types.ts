@@ -69,8 +69,15 @@ export class TypicalWrappedError extends Error {
 
 export class TypicalHttpError extends Error {
   name = 'TypicalHttpError';
-  constructor(public status: number, message?: string) {
-    super(message ?? `Status: ${status}`);
+  status: number;
+  statusText: string;
+  res: Response;
+
+  constructor(res: Response) {
+    super(`${res.status} ${res.statusText}`);
+    this.status = res.status;
+    this.statusText = res.statusText;
+    this.res = res;
   }
 }
 

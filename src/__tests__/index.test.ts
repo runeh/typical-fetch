@@ -7,6 +7,7 @@ import { buildCall } from '../index';
 import { buildUrl, unwrapError } from '../common';
 import invariant from 'ts-invariant';
 import { createReadStream } from 'fs';
+import { TypicalHttpError } from '../types';
 
 const baseUrl = 'http://www.example.org';
 
@@ -1054,24 +1055,52 @@ describe('call builder', () => {
   });
 
   describe('error return values', () => {
-    it('smoke 1', async () => {
-      const scope = nock(baseUrl) //
-        .get('/boop')
-        .reply(500);
+    describe('http errors', () => {
+      it('smoke test', async () => {
+        const scope = nock(baseUrl) //
+          .get('/boop')
+          .reply(500);
 
-      const fetcher = buildCall() //
-        .path('/boop')
-        .method('get')
-        .build();
+        const fetcher = buildCall() //
+          .path('/boop')
+          .method('get')
+          .build();
 
-      const res = await fetcher({ baseUrl });
+        const res = await fetcher({ baseUrl });
 
-      expect(res.success).toEqual(false);
-      expect(res?.error?.name).toEqual('TypicalHttpError');
-      expect(res?.error).toMatchInlineSnapshot(
-        `[TypicalHttpError: Status: 500]`,
-      );
-      expect(scope.isDone()).toEqual(true);
+        expect(res.success).toEqual(false);
+        expect(res.error instanceof TypicalHttpError).toEqual(true);
+        invariant(res.error instanceof TypicalHttpError);
+        expect(res.error.name).toEqual('TypicalHttpError');
+        expect(res.error.status).toEqual(500);
+        expect(res.error.statusText).toEqual('Internal Server Error');
+        expect(res.error).toMatchInlineSnapshot(
+          `[TypicalHttpError: 500 Internal Server Error]`,
+        );
+        expect(scope.isDone()).toEqual(true);
+      });
+
+      it('can interact with response object', async () => {
+        const scope = nock(baseUrl) //
+          .get('/boop')
+          .reply(401, 'None shall pass!');
+
+        const fetcher = buildCall() //
+          .path('/boop')
+          .method('get')
+          .build();
+
+        const res = await fetcher({ baseUrl });
+
+        expect(res.success).toEqual(false);
+        expect(res.error instanceof TypicalHttpError).toEqual(true);
+        invariant(res.error instanceof TypicalHttpError);
+        expect(res.error.name).toEqual('TypicalHttpError');
+
+        const body = await res.error.res.text();
+
+        expect(body).toEqual('None shall pass!');
+      });
     });
 
     it('smoke 2', async () => {
