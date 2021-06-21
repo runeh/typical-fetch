@@ -1143,6 +1143,26 @@ describe('call builder', () => {
       expect(scope.isDone()).toEqual(true);
     });
 
+    it('multiple mappers', async () => {
+      const scope = nock(baseUrl) //
+        .get('/boop')
+        .reply(500);
+
+      const fetcher = buildCall()
+        .path('/boop')
+        .method('get')
+        .mapError(() => 1)
+        .mapError((prev) => prev + 1)
+        .build();
+
+      const res = await fetcher({ baseUrl });
+
+      expect(res.success).toEqual(false);
+      expect(res?.error).toEqual(2);
+      expect(res?.error).toMatchInlineSnapshot(`2`);
+      expect(scope.isDone()).toEqual(true);
+    });
+
     it.todo('runtype failure');
   });
 });

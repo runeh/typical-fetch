@@ -5,9 +5,10 @@ import { BodyInit, Headers, HeadersInit } from 'node-fetch';
 import invariant from 'ts-invariant';
 import { BodyType, CallRecord, QueryParam, TypicalWrappedError } from './types';
 
-export function getBodyInfo(
-  data: BodyType | undefined,
-): { body?: BodyInit; contentType?: string } {
+export function getBodyInfo(data: BodyType | undefined): {
+  body?: BodyInit;
+  contentType?: string;
+} {
   if (data === undefined) {
     return {};
   } else if (typeof data === 'string') {
@@ -90,7 +91,7 @@ export function applyErrorMappers(
 ) {
   let newError = error;
   for (const mapper of mappers) {
-    newError = mapper(error, args);
+    newError = mapper(newError, args);
   }
   return newError;
 }
