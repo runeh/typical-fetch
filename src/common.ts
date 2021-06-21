@@ -84,14 +84,14 @@ export function getFetchParams(
   return { url, headers, body };
 }
 
-export function applyErrorMappers(
+export async function applyErrorMappers(
   error: any,
   mappers: CallRecord['errorMappers'],
   args: any,
 ) {
   let newError = error;
   for (const mapper of mappers) {
-    newError = mapper(newError, args);
+    newError = await mapper(newError, args);
   }
   return newError;
 }

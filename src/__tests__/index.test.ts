@@ -1163,6 +1163,54 @@ describe('call builder', () => {
       expect(scope.isDone()).toEqual(true);
     });
 
+    it('async error mapper', async () => {
+      const scope = nock(baseUrl) //
+        .get('/boop')
+        .reply(500);
+
+      const fetcher = buildCall()
+        .path('/boop')
+        .method('get')
+        .mapError(async (_err) => {
+          await new Promise((res) => setTimeout(res, 1));
+          return 'async arrar!';
+        })
+        .build();
+
+      const res = await fetcher({ baseUrl });
+
+      expect(res.success).toEqual(false);
+      expect(res?.error).toEqual('async arrar!');
+      expect(res?.error).toMatchInlineSnapshot(`"async arrar!"`);
+      expect(scope.isDone()).toEqual(true);
+    });
+
+    it('mixed sync and async error mapper', async () => {
+      const scope = nock(baseUrl) //
+        .get('/boop')
+        .reply(500);
+
+      const fetcher = buildCall()
+        .path('/boop')
+        .method('get')
+        .mapError((_) => 'error!')
+        .mapError(async (err) => {
+          console.log(err);
+          await new Promise((res) => setTimeout(res, 1));
+          return err.toUpperCase();
+        })
+
+        .mapError((err) => `${err}!!11`)
+        .build();
+
+      const res = await fetcher({ baseUrl });
+
+      expect(res.success).toEqual(false);
+      expect(res?.error).toEqual('ERROR!!!11');
+      expect(res?.error).toMatchInlineSnapshot(`"ERROR!!!11"`);
+      expect(scope.isDone()).toEqual(true);
+    });
+
     it.todo('runtype failure');
   });
 });

@@ -220,7 +220,7 @@ that is likely more specific.
 The `TypicalHttpError` includes the `Response` object so consumers can extract
 more information from it as needed. The default error handing will not have
 called the `.text()` and `.json()`methods on the response, so these can bue used
-when parsing the error.
+when parsing the error. Error mappers are allowed to be asynchronous.
 
 ```typescript
 const fetcher = buildCall() //
