@@ -19,7 +19,7 @@ export { unwrapError } from './common';
 export class CallBuilder<
   Ret = void,
   Arg extends Record<string, any> = { baseUrl: string | URL },
-  Err = TypicalWrappedError | TypicalHttpError,
+  Err = TypicalWrappedError | TypicalHttpError
 > {
   private record: CallRecord;
 
@@ -145,7 +145,9 @@ export class CallBuilder<
    * called multiple times. Each map function will receive the result of the
    * previous mapper.
    */
-  mapError<T>(mapper: (error: Err, args: Arg) => T): CallBuilder<Ret, Arg, T> {
+  mapError<T>(
+    mapper: (error: Err, args: Arg) => T | Promise<T>,
+  ): CallBuilder<Ret, Arg, T> {
     return new CallBuilder<Ret, Arg, T>({
       ...this.record,
       errorMappers: [...this.record.errorMappers, mapper],
@@ -273,7 +275,7 @@ export class CallBuilder<
           return {
             success: false,
             body: undefined,
-            error: applyErrorMappers(
+            error: await applyErrorMappers(
               new TypicalHttpError(res),
               errorMappers,
               args,
@@ -307,7 +309,7 @@ export class CallBuilder<
         return {
           success: false,
           body: undefined,
-          error: applyErrorMappers(
+          error: await applyErrorMappers(
             new TypicalWrappedError(error, res, text),
             errorMappers,
             args,
