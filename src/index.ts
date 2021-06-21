@@ -16,10 +16,12 @@ import {
 
 export { unwrapError } from './common';
 
+export { TypicalHttpError, TypicalWrappedError };
+
 export class CallBuilder<
   Ret = void,
   Arg extends Record<string, any> = { baseUrl: string | URL },
-  Err = TypicalWrappedError | TypicalHttpError
+  Err = TypicalWrappedError | TypicalHttpError,
 > {
   private record: CallRecord;
 
