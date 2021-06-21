@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.0](https://www.github.com/runeh/typical-fetch/compare/v1.2.0...v1.3.0) (2021-06-21)
+
+
+### Features
+
+* Export error classes ([df527ad](https://www.github.com/runeh/typical-fetch/commit/df527adecd13bcbddb1c1503f3ea0d208d780f5f))
+
 ## [1.2.0](https://www.github.com/runeh/typical-fetch/compare/v1.1.0...v1.2.0) (2021-06-21)
 
 
