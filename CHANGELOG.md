@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.2.0](https://www.github.com/runeh/typical-fetch/compare/v1.1.0...v1.2.0) (2021-06-21)
+
+
+### Features
+
+* Allow async error mappers ([#8](https://www.github.com/runeh/typical-fetch/issues/8)) ([1596744](https://www.github.com/runeh/typical-fetch/commit/15967449dd30c79f222f53136c8fcf4f8ad9a796))
+
+
+### Bug Fixes
+
+* Fix mapError to return transformed error ([780a166](https://www.github.com/runeh/typical-fetch/commit/780a16605498738ca3638f3b3910ebd903f2d98e))
+
 ## [1.1.0](https://www.github.com/runeh/typical-fetch/compare/v1.0.3...v1.1.0) (2021-06-20)
 
 
