@@ -4,7 +4,7 @@ import FormData from 'form-data';
 import nock from 'nock';
 import { Headers } from 'node-fetch';
 import { buildCall } from '../index';
-import { buildUrl, unwrapError } from '../common';
+import { buildUrl, isFormData, unwrapError } from '../common';
 import invariant from 'ts-invariant';
 import { createReadStream } from 'fs';
 import { TypicalHttpError } from '../types';
@@ -1195,7 +1195,6 @@ describe('call builder', () => {
         .method('get')
         .mapError((_) => 'error!')
         .mapError(async (err) => {
-          console.log(err);
           await new Promise((res) => setTimeout(res, 1));
           return err.toUpperCase();
         })
@@ -1309,6 +1308,18 @@ describe('buildUrl', () => {
       expect(res.body).toBeUndefined();
 
       expect(scope.isDone()).toEqual(true);
+    });
+  });
+
+  describe('isFormData', () => {
+    it('smoke test', () => {
+      expect(isFormData(Buffer.from('asdf'))).toEqual(false);
+      expect(isFormData(new URLSearchParams())).toEqual(false);
+      expect(isFormData(undefined)).toEqual(false);
+      expect(isFormData(new FormData())).toEqual(true);
+      expect(
+        isFormData({ toString: () => '[object FormData]' } as any),
+      ).toEqual(true);
     });
   });
 });
