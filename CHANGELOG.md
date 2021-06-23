@@ -1,5 +1,12 @@
 # Changelog
 
+### [1.3.1](https://www.github.com/runeh/typical-fetch/compare/v1.3.0...v1.3.1) (2021-06-23)
+
+
+### Bug Fixes
+
+* Detect more kinds of FormData objects ([#11](https://www.github.com/runeh/typical-fetch/issues/11)) ([6182413](https://www.github.com/runeh/typical-fetch/commit/6182413b0e2a79f32307ab870e98049b4033345a))
+
 ## [1.3.0](https://www.github.com/runeh/typical-fetch/compare/v1.2.0...v1.3.0) (2021-06-21)
 
 
