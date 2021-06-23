@@ -5,6 +5,21 @@ import { BodyInit, Headers, HeadersInit } from 'node-fetch';
 import invariant from 'ts-invariant';
 import { BodyType, CallRecord, QueryParam, TypicalWrappedError } from './types';
 
+/**
+ * Tries to detect if something is a FormData object. Since the consuming code
+ * may be using a different version of form-data than this lib, we can't trust
+ * the instanceof check to always work. The `form-data` package explicitly sets
+ * the return value of `someFormData.toString()` to `[object FormData]`, so we
+ * use that for the extra check.
+ * @param thing
+ * @returns
+ */
+export function isFormData(thing: BodyType | undefined): thing is FormData {
+  return thing == null
+    ? false
+    : thing instanceof FormData || thing.toString() === '[object FormData]';
+}
+
 export function getBodyInfo(data: BodyType | undefined): {
   body?: BodyInit;
   contentType?: string;
@@ -17,7 +32,7 @@ export function getBodyInfo(data: BodyType | undefined): {
     Buffer.isBuffer(data) ||
     data instanceof Readable ||
     data instanceof URLSearchParams ||
-    data instanceof FormData
+    isFormData(data)
   ) {
     return { body: data };
   } else {
