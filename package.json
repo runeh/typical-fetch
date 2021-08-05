@@ -3,7 +3,8 @@
   "version": "1.3.2",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
-  "repository": "git@github.com:runeh/typical-fetch.git",
+  "repository": "github:runeh/typical-fetch",
+  "homepage": "https://github.com/runeh/typical-fetch#readme",
   "author": "Rune Finstad Halvorsen <runefh@gmail.com>",
   "license": "Apache-2.0",
   "scripts": {
