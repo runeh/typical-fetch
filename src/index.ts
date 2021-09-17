@@ -15,6 +15,7 @@ import {
 } from './types';
 
 export { unwrapError } from './common';
+export { CallReturn } from './types';
 
 export { TypicalHttpError, TypicalWrappedError };
 
