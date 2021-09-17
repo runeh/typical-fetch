@@ -1,6 +1,6 @@
 {
   "name": "typical-fetch",
-  "version": "1.3.2",
+  "version": "1.4.0",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
   "repository": "github:runeh/typical-fetch",

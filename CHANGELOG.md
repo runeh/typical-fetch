@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.0](https://www.github.com/runeh/typical-fetch/compare/v1.3.1...v1.4.0) (2021-09-17)
+
+
+### Features
+
+* Export CallReturn ([#15](https://www.github.com/runeh/typical-fetch/issues/15)) ([8efcd88](https://www.github.com/runeh/typical-fetch/commit/8efcd889ab59c5d89c2db8d20e8b200c594ebc30))
+
 ### [1.3.1](https://www.github.com/runeh/typical-fetch/compare/v1.3.0...v1.3.1) (2021-06-23)
 
 
