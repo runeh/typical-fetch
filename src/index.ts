@@ -5,6 +5,7 @@ import { applyErrorMappers, getFetchParams } from './common';
 import {
   BodyType,
   CallRecord,
+  CallReturn,
   FetchCall,
   HttpMethod,
   MergedArgs,
@@ -16,7 +17,7 @@ import {
 
 export { unwrapError } from './common';
 
-export { TypicalHttpError, TypicalWrappedError };
+export { TypicalHttpError, TypicalWrappedError, CallReturn };
 
 export class CallBuilder<
   Ret = void,
