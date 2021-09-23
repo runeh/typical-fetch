@@ -43,7 +43,7 @@ export type BodyType = JsonRoot | BodyInit;
 export interface CallRecord {
   readonly baseUrl?: URL;
   readonly errorMappers: ((error: any, arg: any) => unknown)[];
-  readonly getBody?: (arg: any) => BodyType;
+  readonly getBody?: (arg: any) => BodyType | Promise<BodyType>;
   readonly getHeaders: ((arg: any) => HeadersInit)[];
   readonly getPath?: (arg: any) => string;
   readonly getQuery: ((arg: any) => QueryParam)[];

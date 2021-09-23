@@ -858,6 +858,22 @@ describe('call builder', () => {
 
       expect(scope.isDone()).toEqual(true);
     });
+
+    it('async body producer', async () => {
+      const scope = nock(baseUrl) //
+        .post('/boop', 'async data')
+        .reply(200);
+
+      const fetcher = buildCall()
+        .path('/boop')
+        .method('post')
+        .body(async () => 'async data')
+        .build();
+
+      await fetcher({ baseUrl });
+
+      expect(scope.isDone()).toEqual(true);
+    });
   });
 
   describe('errors during call definition', () => {

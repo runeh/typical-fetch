@@ -72,11 +72,11 @@ export function buildUrl(baseUrl: string | URL, path: string): URL {
   return new URL(fullPath, base.origin);
 }
 
-export function getFetchParams(
+export async function getFetchParams(
   record: CallRecord,
   baseUrl: string | URL,
   args: any,
-): { url: URL; headers: Headers; body: BodyInit | undefined } {
+): Promise<{ url: URL; headers: Headers; body: BodyInit | undefined }> {
   const { getHeaders, getBody, getPath, getQuery } = record;
   invariant(getPath != null, 'No path set');
 
@@ -89,7 +89,7 @@ export function getFetchParams(
   });
 
   const headers = mergeHeaders(getHeaders.map((e) => e(args)));
-  const rawBody = getBody ? getBody(args) : undefined;
+  const rawBody = getBody ? await getBody(args) : undefined;
   const { body, contentType } = getBodyInfo(rawBody);
 
   if (contentType) {

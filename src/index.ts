@@ -161,9 +161,15 @@ export class CallBuilder<
    * Add data the fetcher will send when making http requests.
    */
   body(data: BodyType): CallBuilder<Ret, Arg, Err>;
+  body(data: Promise<BodyType>): CallBuilder<Ret, Arg, Err>;
   body(fun: (args: Arg) => BodyType): CallBuilder<Ret, Arg, Err>;
+  body(fun: (args: Arg) => Promise<BodyType>): CallBuilder<Ret, Arg, Err>;
   body(
-    funOrData: ((args: Arg) => BodyType) | BodyType,
+    funOrData:
+      | ((args: Arg) => BodyType)
+      | ((args: Arg) => Promise<BodyType>)
+      | Promise<BodyType>
+      | BodyType,
   ): CallBuilder<Ret, Arg, Err> {
     invariant(this.record.getBody == null, "Can't set body multiple times");
     const getBody =
@@ -267,7 +273,7 @@ export class CallBuilder<
       let text: string | undefined = undefined;
       const baseUrl = this.record.baseUrl ?? args.baseUrl;
       try {
-        const { body, headers, url } = getFetchParams(
+        const { body, headers, url } = await getFetchParams(
           this.record,
           baseUrl,
           args,
