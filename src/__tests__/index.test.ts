@@ -1339,3 +1339,5 @@ describe('buildUrl', () => {
     });
   });
 });
+
+it.todo('Check that throwing in an async body producer works as expected');
