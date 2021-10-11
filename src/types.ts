@@ -87,7 +87,7 @@ interface JsonObject {
   [member: string]: JsonValue;
 }
 
-type JsonArray = Array<JsonValue>;
+type JsonArray = Array<JsonValue> | ReadonlyArray<JsonValue>;
 
 type JsonValue = string | number | boolean | null | JsonObject | JsonArray;
 
