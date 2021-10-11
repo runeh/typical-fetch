@@ -1,5 +1,12 @@
 # Changelog
 
+### [1.4.1](https://www.github.com/runeh/typical-fetch/compare/v1.4.0...v1.4.1) (2021-10-11)
+
+
+### Bug Fixes
+
+* Allow read only arrays as json values ([#17](https://www.github.com/runeh/typical-fetch/issues/17)) ([9e0bb32](https://www.github.com/runeh/typical-fetch/commit/9e0bb32c1818f9a24211e21a812f2d3741f96955))
+
 ## [1.4.0](https://www.github.com/runeh/typical-fetch/compare/v1.3.1...v1.4.0) (2021-09-17)
 
 
