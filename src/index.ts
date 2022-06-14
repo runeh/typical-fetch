@@ -279,7 +279,7 @@ export class CallBuilder<
             success: false,
             body: undefined,
             error: await applyErrorMappers(
-              new TypicalHttpError(res),
+              new TypicalHttpError(res, requestInit),
               errorMappers,
               args,
             ),
@@ -313,7 +313,7 @@ export class CallBuilder<
           success: false,
           body: undefined,
           error: await applyErrorMappers(
-            new TypicalWrappedError(error, res, text),
+            new TypicalWrappedError(error, res, text, requestInit),
             errorMappers,
             args,
           ),
