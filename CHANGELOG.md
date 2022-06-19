@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.0](https://www.github.com/runeh/typical-fetch/compare/v1.4.1...v1.5.0) (2022-06-19)
+
+
+### Features
+
+* add request to errors ([#19](https://www.github.com/runeh/typical-fetch/issues/19)) ([873af97](https://www.github.com/runeh/typical-fetch/commit/873af974ca57f0497e9c022606ffc57c3aa4128f))
+
 ### [1.4.1](https://www.github.com/runeh/typical-fetch/compare/v1.4.0...v1.4.1) (2021-10-11)
 
 
