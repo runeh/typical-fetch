@@ -62,6 +62,7 @@ export class TypicalWrappedError extends Error {
     public wrappedError: unknown,
     public response: Response | undefined,
     public bodyText: string | undefined,
+    public request?: TypicalRequestInit,
   ) {
     super(wrappedError instanceof Error ? wrappedError.name : 'unknown');
   }
@@ -71,13 +72,15 @@ export class TypicalHttpError extends Error {
   name = 'TypicalHttpError';
   status: number;
   statusText: string;
+  req?: TypicalRequestInit;
   res: Response;
 
-  constructor(res: Response) {
+  constructor(res: Response, req?: TypicalRequestInit) {
     super(`${res.status} ${res.statusText}`);
     this.status = res.status;
     this.statusText = res.statusText;
     this.res = res;
+    this.req = req;
   }
 }
 
