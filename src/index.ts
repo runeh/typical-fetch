@@ -1,6 +1,6 @@
 import { URL } from 'url';
-import fetch, { HeadersInit, Response } from 'node-fetch';
 import { invariant } from 'ts-invariant';
+import { HeadersInit, Response, fetch } from 'undici';
 import { applyErrorMappers, getFetchParams } from './common';
 import {
   BodyType,

@@ -5,7 +5,7 @@ import {
   BodyInit as OriginalBodyInit,
   RequestInit,
   Response,
-} from 'node-fetch';
+} from 'undici';
 
 export type CallReturn<Ret, Err> =
   | { success: true; body: Ret; error: undefined }

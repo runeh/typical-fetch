@@ -1,8 +1,7 @@
 import { Readable } from 'stream';
 import { URL, URLSearchParams } from 'url';
-import FormData from 'form-data';
-import { BodyInit, Headers, HeadersInit } from 'node-fetch';
 import invariant from 'ts-invariant';
+import { BodyInit, FormData, Headers, HeadersInit } from 'undici';
 import { BodyType, CallRecord, QueryParam, TypicalWrappedError } from './types';
 
 /**
@@ -56,9 +55,19 @@ export function mergeHeaders(defs: HeadersInit[]): Headers {
     } else if (e instanceof Headers) {
       return Array.from(e.entries());
     } else {
-      return Object.entries(e);
+      return Object.entries(e).reduce<string[][]>((c, [key, val]) => {
+        if (Array.isArray(val)) {
+          val.forEach((v) => {
+            c.push([key, v]);
+          });
+        } else {
+          c.push([key, val as string]);
+        }
+        return c;
+      }, []);
     }
   });
+
   return new Headers(headersList);
 }
 
