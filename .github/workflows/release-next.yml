@@ -1,0 +1,44 @@
+name: Prerelease
+on:
+  push:
+    branches:
+      - next
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [16.x]
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: GoogleCloudPlatform/release-please-action@v3
+        id: release
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          package-name: typical-fetch
+          release-type: node
+          default-branch: next
+          prerelease: true
+
+      - if: ${{ steps.release.outputs.release_created }}
+        name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: yarn
+          registry-url: 'https://registry.npmjs.org'
+
+      - if: ${{ steps.release.outputs.release_created }}
+        run: yarn install
+
+      - if: ${{ steps.release.outputs.release_created }}
+        run: yarn run build
+
+      - if: ${{ steps.release.outputs.release_created }}
+        run: yarn publish
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
