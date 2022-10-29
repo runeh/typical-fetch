@@ -1,8 +1,7 @@
 import { URL, URLSearchParams } from 'url';
 import { resolve } from 'path';
-import FormData from 'form-data';
+import { FormData, Headers } from 'undici';
 import nock from 'nock';
-import { Headers } from 'node-fetch';
 import { buildCall } from '../index';
 import { buildUrl, isFormData, unwrapError } from '../common';
 import invariant from 'ts-invariant';
