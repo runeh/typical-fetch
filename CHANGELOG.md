@@ -1,5 +1,16 @@
 # Changelog
 
+## [2.0.0](https://github.com/runeh/typical-fetch/compare/v1.5.0...v2.0.0) (2022-10-29)
+
+
+### ⚠ BREAKING CHANGES
+
+* Replace node-fetch with undici (#21)
+
+### Features
+
+* Replace node-fetch with undici ([#21](https://github.com/runeh/typical-fetch/issues/21)) ([b573aab](https://github.com/runeh/typical-fetch/commit/b573aab9aa9f5e5830fec2bf53e3cc06ee301025))
+
 ## [1.5.0](https://www.github.com/runeh/typical-fetch/compare/v1.4.1...v1.5.0) (2022-06-19)
 
 
